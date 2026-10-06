@@ -305,13 +305,6 @@
             gap: 8px;
             margin-top: 10px;
         }
-
-        .api-config-box {
-            border: 2px dashed #fff;
-            padding: 10px;
-            margin-bottom: 12px;
-            background-color: #000;
-        }
     </style>
 </head>
 <body>
@@ -325,7 +318,7 @@
         <div class="header-controls">
             <span class="save-point" id="savePointBtn" title="A strange energy fills you...">★</span>
             <button id="bgmToggleBtn" onclick="toggleBGM()">BGM: GLAMOUR (OFF)</button>
-            <!-- Gob-Only Audio Upload Control -->
+            <!-- Gob-Only Audio Upload Button -->
             <button id="gobAudioBtn" class="hidden" onclick="triggerAudioUpload()">🎵 Load Gob MP3</button>
             <input type="file" id="audioFileInput" accept="audio/*" style="display:none;" onchange="handleAudioUpload(event)">
             <button id="authBtn" onclick="handleAuthAction()">LOGIN</button>
@@ -340,21 +333,18 @@
         <button class="tab-btn disabled-tab" id="tab-btn-search" onclick="switchTab('search-tab')">Ticket Lookup 🔒</button>
     </div>
 
-    <!-- Main Content Area -->
+    <!-- Main Container -->
     <div class="main-container">
 
-        <!-- TAB 1: LIVE GEMINI LLM AI IT SPECIALIST -->
+        <!-- TAB 1: AI IT SPECIALIST CHATBOT -->
         <div id="triage-tab" class="tab-content ut-box">
             <h2>AI IT Specialist Support Portal</h2>
-            
-            <div class="api-config-box">
-                <label for="geminiApiKey">Gemini API Key (Live LLM Access):</label>
-                <input type="password" id="geminiApiKey" placeholder="Paste your Gemini API key here..." style="margin-bottom: 4px;" onchange="saveApiKey()">
-                <div style="font-size: 14px; color: #aaa;">* Key is stored locally in your browser memory. Leave blank to run local fallback model.</div>
-            </div>
+            <p style="margin-bottom: 12px; font-size: 18px; color: #ccc;">
+                Chat freely with the AI IT Specialist. Describe your system, error symptoms, and what you've tried so far.
+            </p>
 
             <div class="chat-window" id="chatWindow">
-                <div class="chat-msg bot">* [AI IT Specialist]: Greetings! I am your automated AI IT Specialist. Describe your hardware, software, or network issue and let me know your specific device context so we can troubleshoot it step-by-step!</div>
+                <div class="chat-msg bot">* [AI IT Specialist]: Greetings! I am your automated AI IT Specialist. Describe your hardware, software, or network issue and let me know your specific device context so we can troubleshoot step-by-step!</div>
             </div>
 
             <form id="chatForm" onsubmit="handleChatSubmit(event)">
@@ -368,7 +358,7 @@
             </form>
         </div>
 
-        <!-- TAB 2: CATEGORIZED TICKET QUEUES (LOCKED FOR GUESTS) -->
+        <!-- TAB 2: CATEGORIZED QUEUES -->
         <div id="queue-tab" class="tab-content ut-box hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2>Active Department Queues</h2>
@@ -398,7 +388,7 @@
             </div>
         </div>
 
-        <!-- TAB 3: ADMIN & USER GOVERNANCE (LOCKED FOR NON-ADMINS) -->
+        <!-- TAB 3: USER GOVERNANCE -->
         <div id="admin-tab" class="tab-content ut-box hidden">
             <h2>User Governance & Access Control</h2>
             <p style="margin-bottom: 15px; font-size: 18px; color: #aaa;" id="adminStatusText">
@@ -413,16 +403,13 @@
                         <th style="padding: 8px;">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="userTableBody">
-                    <!-- Dynamic user records -->
-                </tbody>
+                <tbody id="userTableBody"></tbody>
             </table>
 
             <div id="adminControlPanel" class="hidden" style="border-top: 2px dashed #fff; padding-top: 15px;">
                 <h3>User Administration</h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px;">
-                    <!-- Create User Form -->
                     <div style="border: 1px solid #fff; padding: 12px;">
                         <h4>Create User Account</h4>
                         <form onsubmit="handleCreateUser(event)">
@@ -442,7 +429,6 @@
                         </form>
                     </div>
 
-                    <!-- Reset Password Form -->
                     <div style="border: 1px solid #fff; padding: 12px;">
                         <h4>Reset User Password</h4>
                         <form onsubmit="handleChangePassword(event)">
@@ -459,20 +445,19 @@
             </div>
         </div>
 
-        <!-- TAB 4: TICKET SEARCH -->
+        <!-- TAB 4: TICKET LOOKUP -->
         <div id="search-tab" class="tab-content ut-box hidden">
             <h2>Ticket Search</h2>
             <div style="display: flex; gap: 10px;">
                 <input type="text" id="searchTicketId" placeholder="Enter Ticket ID (e.g., TKT-1001)" style="margin-bottom: 0;">
                 <button onclick="searchTicket()">Search</button>
             </div>
-
             <div id="searchResultArea" style="margin-top: 20px;"></div>
         </div>
 
     </div>
 
-    <!-- FORMAL TICKET SUBMISSION MODAL -->
+    <!-- TICKET MODAL -->
     <div id="ticketModal" class="modal-overlay">
         <div class="modal-content" style="max-width: 550px;">
             <h3>Submit Formal Ticket</h3>
@@ -494,7 +479,7 @@
         </div>
     </div>
 
-    <!-- UNDERTALE SAVE POINT MODAL -->
+    <!-- SAVE POINT MODAL -->
     <div id="saveModal" class="modal-overlay">
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -518,7 +503,7 @@
         </div>
     </div>
 
-    <!-- AUTHENTICATION MODAL -->
+    <!-- AUTH MODAL -->
     <div id="authModal" class="modal-overlay">
         <div class="modal-content" style="max-width: 420px;">
             <h3>System Authentication</h3>
@@ -540,18 +525,22 @@
     <audio id="customAudioElement" loop></audio>
 
     <script>
-        // --- SYSTEM PROMPT MARKDOWN FOR LIVE GEMINI LLM ---
+        // --- HARDCODED GOOGLE AI STUDIO API KEY ---
+        const HARDCODED_GEMINI_KEY = "AQ.Ab8RN6IykXePyGgNenbx4EXD5VplA0aqGbLKsUcl9T4XzbLbYg";
+
+        // --- MARKDOWN SYSTEM PROMPT FOR LIVE GEMINI LLM ---
         const SYSTEM_PROMPT = `
 # Persona: AI IT Specialist
-You are an expert, friendly, and precise AI IT Support Specialist at an IT Helpdesk.
-Your goal is to troubleshoot hardware, software, network, and account access issues step-by-step with the user.
+You are an expert, friendly, and precise AI IT Support Specialist working at an IT Service Desk.
+Your goal is to troubleshoot hardware, software, network, and account access issues step-by-step.
 
-## CRITICAL RULES:
-1. **DEVICE CONTEXT AWARENESS:** Always identify or verify the user's specific operating system (e.g. ChromeOS/Chromebook, Windows, macOS, iOS, Android) BEFORE recommending OS-specific key shortcuts or steps. NEVER offer Windows shortcuts (like Win+Ctrl+Shift+B) to Chromebook or Mac users.
-2. **STEP-BY-STEP DIAGNOSTICS:** Provide 2-3 clear, actionable troubleshooting steps tailored specifically to their verified device.
-3. **CONVERSATIONAL MEMORY:** Maintain tone and context across multiple dialogue turns. Acknowledge what the user says worked or failed.
-4. **NO SELF-IDENTIFICATION AS GEMINI:** Refer to yourself strictly as the "AI IT Specialist".
-5. **ESCALATION OPTION:** If the issue cannot be resolved, politely advise the user to click the "Submit Formal Ticket" button to route the ticket to human IT queues.
+## CRITICAL OPERATIONAL RULES:
+1. **DEVICE CONTEXT AWARENESS:** Always verify or extract the user's explicit operating system (e.g., ChromeOS/Chromebook, Windows, macOS, iOS, Android) BEFORE recommending OS-specific commands or key shortcuts. NEVER suggest Windows shortcuts (like Win+Ctrl+Shift+B) to Chromebook, Mac, or mobile users.
+2. **SEMANTIC DISTILLATION:** Extract the failure location, symptoms, and required technical capabilities from the user's issue description.
+3. **STEP-BY-STEP DIAGNOSTICS:** Provide 2-3 clear, actionable troubleshooting steps tailored specifically to their verified device.
+4. **MULTI-TURN CONVERSATION MEMORY:** Maintain conversation context across dialogue turns. Acknowledge previous troubleshooting steps that succeeded or failed.
+5. **NO MODEL SELF-IDENTIFICATION:** Refer to yourself strictly as the "AI IT Specialist". Do not mention underlying engine or model names.
+6. **ESCALATION OPTION:** If an issue cannot be resolved, politely advise the user to click the "Submit Formal Ticket" button to escalate their request to human IT queues.
 `;
 
         // --- LOCAL STORAGE PERSISTENCE ---
@@ -573,19 +562,7 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
             localStorage.setItem('ut_tickets', JSON.stringify(tickets));
         }
 
-        function saveApiKey() {
-            const key = document.getElementById('geminiApiKey').value.trim();
-            localStorage.setItem('ut_gemini_api_key', key);
-        }
-
-        function loadApiKey() {
-            const savedKey = localStorage.getItem('ut_gemini_api_key');
-            if (savedKey) {
-                document.getElementById('geminiApiKey').value = savedKey;
-            }
-        }
-
-        // Boot BGM Restoration from Local Storage
+        // Restore saved BGM from memory on boot
         function initBGMFromStorage() {
             const savedAudio = localStorage.getItem('ut_bgm_data');
             if (savedAudio) {
@@ -593,7 +570,7 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
             }
         }
 
-        // --- WEB AUDIO SYNTHESIZER & PERSISTENT MP3 LOADER ---
+        // --- WEB AUDIO SYNTHESIZER & MP3 IMPORT HANDLER ---
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -663,41 +640,48 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
 
         function triggerAudioUpload() {
             if (!currentUser || currentUser.username.toLowerCase() !== 'gob') {
-                alert("* PERMISSION ERROR: Only Super Admin 'Gob' can load new BGM tracks.");
+                alert("* PERMISSION ERROR: Only Super Admin 'Gob' can load custom BGM tracks.");
                 return;
             }
             document.getElementById('audioFileInput').click();
         }
 
+        // FIXED MP3 UPLOAD & MEMORY PERSISTENCE HANDLER
         function handleAudioUpload(event) {
-            const file = event.target.files;
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64Audio = e.target.result;
-                    try {
-                        localStorage.setItem('ut_bgm_data', base64Audio);
-                        customAudio.src = base64Audio;
-                        if (bgmInterval) clearInterval(bgmInterval);
-                        customAudio.play();
-                        bgmPlaying = true;
-                        document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM MP3 (ON)";
-                        alert("* BGM updated and saved persistently to website memory!");
-                    } catch(err) {
-                        alert("* Audio loaded for current session.");
-                        customAudio.src = base64Audio;
-                        customAudio.play();
-                        bgmPlaying = true;
-                    }
-                };
-                reader.readAsDataURL(file);
+            const file = event.target.files; // Target single file object
+            if (!file) return;
+
+            // Stop synth loop if active
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
             }
+
+            // Create Object URL for immediate zero-latency audio playback
+            const objectUrl = URL.createObjectURL(file);
+            customAudio.src = objectUrl;
+            customAudio.load();
+            customAudio.play().then(() => {
+                bgmPlaying = true;
+                document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM MP3 (ON)";
+                alert("* Custom MP3 successfully loaded and playing!");
+            }).catch(err => console.error("Playback error:", err));
+
+            // Persist file as Base64 Data URL in localStorage
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    localStorage.setItem('ut_bgm_data', e.target.result);
+                } catch(err) {
+                    console.warn("File exceeds localStorage quota limit; active for current session.");
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
-        // --- AUTHENTICATION & LOGOUT CONTROLS ---
+        // --- AUTHENTICATION & SESSION LOGOUT ---
         function handleAuthAction() {
             if (currentUser) {
-                // Logout Logic
                 currentUser = null;
                 alert("* Session ended. You have logged out successfully.");
                 updateTabLocks();
@@ -779,7 +763,7 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
             if (tabId === 'search-tab') document.getElementById('tab-btn-search').classList.add('active');
         }
 
-        // --- LIVE GEMINI API CHAT AGENT ---
+        // --- LIVE GEMINI LLM AI IT SPECIALIST ENGINE ---
         async function handleChatSubmit(e) {
             e.preventDefault();
             const inputEl = document.getElementById('chatInput');
@@ -809,12 +793,10 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
 
             sendBtn.disabled = true;
 
-            const apiKey = document.getElementById('geminiApiKey').value.trim();
-
-            if (apiKey) {
-                // LIVE API CALL TO GEMINI
+            if (HARDCODED_GEMINI_KEY && HARDCODED_GEMINI_KEY !== "YOUR_GEMINI_API_KEY_HERE") {
+                // LIVE API CALL TO GEMINI MODEL
                 try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${HARDCODED_GEMINI_KEY}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -827,16 +809,16 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
 
                     if (data.candidates && data.candidates.content.parts.text) {
                         const replyText = data.candidates.content.parts.text;
-                        botMsg.innerText = "* [AI IT Specialist]: " + replyText;
+                        botMsg.innerText = "* [AI IT Specialist]:\n" + replyText;
                         chatHistory.push({ role: "model", parts: [{ text: replyText }] });
                     } else {
-                        botMsg.innerText = "* [AI IT Specialist]: API Response error. Please check your Gemini API key.";
+                        botMsg.innerText = "* [AI IT Specialist]: API Response error. Please verify your hardcoded key in the source code.";
                     }
                 } catch (err) {
-                    botMsg.innerText = "* [AI IT Specialist Error]: Unable to reach Gemini API. Check network or key.";
+                    botMsg.innerText = "* [AI IT Specialist Error]: Unable to reach Gemini API endpoint.";
                 }
             } else {
-                // LOCAL CONTEXT-AWARE FALLBACK MODEL
+                // LOCAL CONTEXT-AWARE FALLBACK
                 setTimeout(() => {
                     const replyText = localFallbackLLM(query, chatHistory);
                     botMsg.innerText = replyText;
@@ -858,25 +840,25 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
 
             if (fullText.includes("chromebook") || lowerQuery.includes("chrome") || lowerQuery.includes("cros")) {
                 if (lowerQuery.includes("green") || lowerQuery.includes("flash") || lowerQuery.includes("black")) {
-                    text += "Dell Chromebook display failure loop detected.\n\nSince you are on ChromeOS, do NOT use Windows shortcuts. Try these ChromeOS hardware resets:\n";
-                    text += "1. Refresh Reset: Hold Refresh (↻) + tap Power.\n";
-                    text += "2. EC Power Drain: Unplug charger, hold Power for 15s, re-plug AC power.\n";
-                    text += "3. Tap Brightness Up (🔆) on the top function row.\n\nDid holding Refresh + Power display the Chrome boot logo?";
+                    text += "Dell Chromebook display failure state detected.\n\nSince you are on ChromeOS, do NOT use Windows key shortcuts. Please perform these ChromeOS hardware resets:\n";
+                    text += "1. Refresh Reset: Hold Refresh (↻) + tap the Power button.\n";
+                    text += "2. EC Power Drain: Unplug the charger, hold Power for 15 seconds, then reconnect AC power.\n";
+                    text += "3. Tap Brightness Up (🔆) on the top function row.\n\nDid holding Refresh + Power bring up the Chrome boot logo?";
                 } else {
-                    text += "ChromeOS context confirmed. Try Guest Mode, logging out, or resetting hardware (Refresh + Power).";
+                    text += "ChromeOS environment active. Try Guest Mode, signing out of your Google account, or executing a hard refresh (Refresh + Power).";
                 }
             } else if (fullText.includes("iphone") || lowerQuery.includes("ios") || lowerQuery.includes("apple")) {
-                text += "iOS context recognized. Force restart: Vol Up, Vol Down, then hold Side Power button until Apple logo appears.";
+                text += "iOS environment recognized. Forced reboot: Quick-press Vol Up, quick-press Vol Down, then hold Side Power button until the Apple logo appears.";
             } else if (fullText.includes("windows") || lowerQuery.includes("pc")) {
-                text += "Windows PC context recognized. Driver Reset: Press Win + Ctrl + Shift + B.";
+                text += "Windows PC environment recognized. Driver Reset: Press Win + Ctrl + Shift + B.";
             } else {
-                text += "Welcome! To give you accurate diagnostic steps, what specific brand and operating system are you using (e.g. Chromebook, Windows PC, Mac, iPhone)?";
+                text += "Welcome! To ensure I provide accurate diagnostic steps, what specific brand and operating system are you using (e.g., Chromebook, Windows PC, Mac, iPhone)?";
             }
 
             return text;
         }
 
-        // --- FORMAL TICKET ESCALATION MODAL ---
+        // --- TICKET ESCALATION MODAL ---
         function openDirectTicketModal() {
             document.getElementById('ticketModal').style.display = 'flex';
         }
@@ -947,7 +929,7 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
             }
         }
 
-        // --- QUEUE DISPLAY & ACTIONS ---
+        // --- QUEUE DISPLAY & SLA ACTIONS ---
         function renderQueue() {
             const categories = ["Hardware", "Software", "Network", "Account Access"];
             const urgencyRank = { "P1": 1, "P2": 2, "P3": 3, "P4": 4 };
@@ -1053,7 +1035,7 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
             }
         }
 
-        // --- USER GOVERNANCE & FIXED ACCOUNT DELETION ---
+        // --- USER GOVERNANCE & ACCOUNT DELETION ---
         function renderUsers() {
             const tbody = document.getElementById('userTableBody');
             const selectEl = document.getElementById('changePasswordUserSelect');
@@ -1263,9 +1245,9 @@ Your goal is to troubleshoot hardware, software, network, and account access iss
 
         // Boot Initialization
         saveState();
-        loadApiKey();
         initBGMFromStorage();
         updateTabLocks();
     </script>
 </body>
 </html>
+How do confidence
