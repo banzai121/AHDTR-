@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Determination Helpdesk Ticket Router</title>
+    <title>Automated Helpdesk Ticket Router</title>
     <!-- Determination / Retro Monospace Typography -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <style>
@@ -318,7 +318,8 @@
         <div class="header-controls">
             <span class="save-point" id="savePointBtn" title="A strange energy fills you...">★</span>
             <button id="bgmToggleBtn" onclick="toggleBGM()">BGM: GLAMOUR (OFF)</button>
-            <button onclick="triggerAudioUpload()">🎵 Load MP3 Audio</button>
+            <!-- Gob-Only Audio Upload Control -->
+            <button id="gobAudioBtn" class="hidden" onclick="triggerAudioUpload()">🎵 Load Gob MP3</button>
             <input type="file" id="audioFileInput" accept="audio/*" style="display:none;" onchange="handleAudioUpload(event)">
             <button id="authBtn" onclick="handleAuthAction()">LOGIN</button>
         </div>
@@ -326,7 +327,7 @@
 
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
-        <button class="tab-btn active" id="tab-btn-triage" onclick="switchTab('triage-tab')">Gemini AI Bot</button>
+        <button class="tab-btn active" id="tab-btn-triage" onclick="switchTab('triage-tab')">AI IT Specialist</button>
         <button class="tab-btn disabled-tab" id="tab-btn-queue" onclick="switchTab('queue-tab')">Categorized Queues 🔒</button>
         <button class="tab-btn disabled-tab" id="tab-btn-admin" onclick="switchTab('admin-tab')">Staff & User Admin 🔒</button>
         <button class="tab-btn disabled-tab" id="tab-btn-search" onclick="switchTab('search-tab')">Ticket Lookup 🔒</button>
@@ -335,23 +336,23 @@
     <!-- Main Content Area -->
     <div class="main-container">
 
-        <!-- TAB 1: DYNAMIC GEMINI IT HELPDESK CHATBOT -->
+        <!-- TAB 1: AI IT SPECIALIST CHATBOT -->
         <div id="triage-tab" class="tab-content ut-box">
-            <h2>Gemini IT Helpdesk Conversational Assistant</h2>
+            <h2>AI IT Specialist Support Portal</h2>
             <p style="margin-bottom: 12px; font-size: 18px; color: #ccc;">
-                Describe your issue below. The Gemini AI agent will analyze your device context dynamically and troubleshoot step-by-step.
+                Chat freely with your dedicated AI IT Specialist. Describe your system, error symptoms, and what you've tried so far.
             </p>
 
             <div class="chat-window" id="chatWindow">
-                <div class="chat-msg bot">* [Gemini IT Helpdesk Specialist]: Greetings! I am your AI IT Support Worker. Describe your hardware, software, or networking problem, and let me know what device you are using so we can fix it!</div>
+                <div class="chat-msg bot">* [AI IT Specialist]: Greetings! I am your automated IT Support Specialist. Describe your hardware, software, or network issue and let me know your specific device context so we can troubleshoot it step-by-step!</div>
             </div>
 
             <form id="chatForm" onsubmit="handleChatSubmit(event)">
                 <label for="chatInput">Your Message / Query:</label>
-                <input type="text" id="chatInput" placeholder="e.g. My Dell Chromebook flashes green and goes black." required>
+                <input type="text" id="chatInput" placeholder="e.g. My Dell Chromebook flashes green and goes black on boot." required>
 
                 <div style="display: flex; gap: 10px; margin-top: 6px;">
-                    <button type="submit" style="flex: 1;">Send to Gemini</button>
+                    <button type="submit" style="flex: 1;">Send to AI Specialist</button>
                     <button type="button" onclick="openDirectTicketModal()" style="background-color: #222;">Submit Formal Ticket</button>
                 </div>
             </form>
@@ -403,7 +404,7 @@
                     </tr>
                 </thead>
                 <tbody id="userTableBody">
-                    <!-- User records generated dynamically -->
+                    <!-- Dynamic user records -->
                 </tbody>
             </table>
 
@@ -540,7 +541,7 @@
         let bgmPlaying = false;
         let audioCtx = null;
         let bgmInterval = null;
-        let chatHistory = []; // Dynamic Conversation Memory State
+        let chatHistory = []; // Multi-turn conversation memory
         let customAudio = document.getElementById('customAudioElement');
 
         function saveState() {
@@ -548,7 +549,15 @@
             localStorage.setItem('ut_tickets', JSON.stringify(tickets));
         }
 
-        // --- WEB AUDIO SYNTHESIZER (DEATH BY GLAMOUR METTATON THEME) ---
+        // Boot BGM Restoration from Local Storage
+        function initBGMFromStorage() {
+            const savedAudio = localStorage.getItem('ut_bgm_data');
+            if (savedAudio) {
+                customAudio.src = savedAudio;
+            }
+        }
+
+        // --- WEB AUDIO SYNTHESIZER & PERSISTENT MP3 LOADER ---
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -571,7 +580,6 @@
             } catch (e) {}
         }
 
-        // Synthesized "Death by Glamour" Disco Synth Sequence
         function toggleBGM() {
             if (customAudio.src) {
                 if (bgmPlaying) {
@@ -593,7 +601,6 @@
             if (bgmPlaying) {
                 btn.innerText = "BGM: GLAMOUR (ON)";
                 let noteIdx = 0;
-                // Death by Glamour synth bassline/riff notes (F#, A, C#, B, G#, E)
                 const glamourRiff = [369.99, 440.00, 554.37, 493.88, 415.30, 329.63, 369.99, 554.37];
                 
                 bgmInterval = setInterval(() => {
@@ -619,29 +626,44 @@
         }
 
         function triggerAudioUpload() {
+            if (!currentUser || currentUser.username.toLowerCase() !== 'gob') {
+                alert("* PERMISSION ERROR: Only Super Admin 'Gob' can load new BGM tracks.");
+                return;
+            }
             document.getElementById('audioFileInput').click();
         }
 
         function handleAudioUpload(event) {
             const file = event.target.files;
             if (file) {
-                const url = URL.createObjectURL(file);
-                customAudio.src = url;
-                if (bgmInterval) clearInterval(bgmInterval);
-                customAudio.play();
-                bgmPlaying = true;
-                document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM MP3 (ON)";
-                alert("* Death by Glamour MP3 loaded and playing!");
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Audio = e.target.result;
+                    try {
+                        localStorage.setItem('ut_bgm_data', base64Audio);
+                        customAudio.src = base64Audio;
+                        if (bgmInterval) clearInterval(bgmInterval);
+                        customAudio.play();
+                        bgmPlaying = true;
+                        document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM MP3 (ON)";
+                        alert("* BGM updated and saved persistently to website memory!");
+                    } catch(err) {
+                        alert("* Note: Audio loaded for this session. (File size exceeds standard browser localStorage quota for permanent caching).");
+                        customAudio.src = base64Audio;
+                        customAudio.play();
+                        bgmPlaying = true;
+                    }
+                };
+                reader.readAsDataURL(file);
             }
         }
 
         // --- AUTHENTICATION & LOGOUT CONTROLS ---
         function handleAuthAction() {
             if (currentUser) {
-                // Logout Action
+                // Logout Logic
                 currentUser = null;
-                document.getElementById('authBtn').innerText = "LOGIN";
-                alert("* You have logged out successfully.");
+                alert("* Session ended. You have logged out successfully.");
                 updateTabLocks();
                 switchTab('triage-tab');
             } else {
@@ -653,10 +675,19 @@
             const isAuth = currentUser !== null;
             const isStaffOrAbove = isAuth && (currentUser.role === "Staff" || currentUser.role === "Admin" || currentUser.role === "Super Admin");
             const isAdminOrGob = isAuth && (currentUser.role === "Admin" || currentUser.role === "Super Admin");
+            const isGob = isAuth && currentUser.username.toLowerCase() === "gob";
 
             const qBtn = document.getElementById('tab-btn-queue');
             const aBtn = document.getElementById('tab-btn-admin');
             const sBtn = document.getElementById('tab-btn-search');
+            const gobBtn = document.getElementById('gobAudioBtn');
+
+            // Restrict MP3 upload button exclusively to Gob
+            if (isGob) {
+                gobBtn.classList.remove('hidden');
+            } else {
+                gobBtn.classList.add('hidden');
+            }
 
             if (isStaffOrAbove) {
                 qBtn.classList.remove('disabled-tab');
@@ -679,24 +710,26 @@
             }
 
             const headerBadge = document.getElementById('userHeaderBadge');
+            const authBtn = document.getElementById('authBtn');
+
             if (currentUser) {
                 headerBadge.innerText = `Session: ${currentUser.username} [${currentUser.role}]`;
-                document.getElementById('authBtn').innerText = `LOGOUT (${currentUser.username.toUpperCase()})`;
+                authBtn.innerText = `LOGOUT (${currentUser.username.toUpperCase()})`;
             } else {
                 headerBadge.innerText = "Session: Guest (Unauthenticated)";
-                document.getElementById('authBtn').innerText = "LOGIN";
+                authBtn.innerText = "LOGIN";
             }
         }
 
         function switchTab(tabId) {
             if (!currentUser && tabId !== 'triage-tab') {
-                alert("* RESTRICTED ACCESS: Please log in to access queue or admin features.");
+                alert("* RESTRICTED ACCESS: Please log in to view queues or administrative panels.");
                 openAuthModal();
                 return;
             }
 
             if (currentUser && currentUser.role === "Staff" && tabId === 'admin-tab') {
-                alert("* ACCESS DENIED: Staff members do not have user management privileges.");
+                alert("* ACCESS DENIED: Staff members do not have administrative privileges.");
                 return;
             }
 
@@ -711,7 +744,7 @@
             if (tabId === 'search-tab') document.getElementById('tab-btn-search').classList.add('active');
         }
 
-        // --- CONVERSATIONAL GEMINI AI AGENT ---
+        // --- UNCONSTRAINED AI IT SPECIALIST ENGINE ---
         function handleChatSubmit(e) {
             e.preventDefault();
             const inputEl = document.getElementById('chatInput');
@@ -720,7 +753,7 @@
 
             const chatWindow = document.getElementById('chatWindow');
 
-            // Add User Message
+            // Append User Message
             const userMsg = document.createElement('div');
             userMsg.className = 'chat-msg user';
             userMsg.innerText = query;
@@ -731,12 +764,12 @@
 
             chatHistory.push({ role: "user", text: query });
 
-            // Generate Context-Aware Gemini AI Response
+            // Context-Aware Response Generation
             setTimeout(() => {
                 const botMsg = document.createElement('div');
                 botMsg.className = 'chat-msg bot';
                 
-                let reply = generateDynamicGeminiResponse(query, chatHistory);
+                let reply = generateAISpecialistResponse(query, chatHistory);
                 botMsg.innerText = reply;
                 chatWindow.appendChild(botMsg);
                 chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -746,7 +779,7 @@
             }, 250);
         }
 
-        function generateDynamicGeminiResponse(currentQuery, history) {
+        function generateAISpecialistResponse(currentQuery, history) {
             const lowerQuery = currentQuery.toLowerCase();
             const fullContext = history.map(h => h.text.toLowerCase()).join(" ");
 
@@ -754,39 +787,32 @@
             let isIPhone = fullContext.includes("iphone") || lowerQuery.includes("ios") || lowerQuery.includes("apple");
             let isWindows = fullContext.includes("windows") || lowerQuery.includes("pc") || lowerQuery.includes("dell xps");
 
-            let text = "* [Gemini IT Helpdesk Specialist]: ";
+            let text = "* [AI IT Specialist]: ";
 
-            // CHROMEBOOK / CHROMEOS WORKFLOW
             if (isChromebook) {
                 if (lowerQuery.includes("green") || lowerQuery.includes("flash") || lowerQuery.includes("black") || lowerQuery.includes("turn on")) {
-                    text += "I see you're working on a Chromebook with a display indicator flashing green before turning black. This usually indicates a power delivery loop or ChromeOS boot freeze.\n\n";
-                    text += "Here are the exact ChromeOS hardware steps to fix this:\n";
-                    text += "1. Hard Reset ChromeOS Hardware: Press and hold the Refresh key (↻) + tap the Power button. Keep holding Refresh until your Chromebook boots up.\n";
-                    text += "2. Power Drain: Disconnect the charger, hold down the Power button for 15 seconds, re-plug the charger, and look for the LED charge light.\n";
-                    text += "3. Display Brightness Check: Tap the Increase Brightness key (🔆) on the top row of your keyboard to verify the screen isn't dimmed to 0%.\n\n";
-                    text += "Did the Refresh + Power hard reset trigger the Chrome boot logo?";
+                    text += "I see you're experiencing display failure on a Dell Chromebook where the indicator flashes green and goes black. This symptom typically indicates a power delivery loop or ChromeOS boot state lock.\n\n";
+                    text += "Please execute these ChromeOS-specific hardware recovery steps:\n";
+                    text += "1. Chrome Hard Reset: Press and hold the Refresh key (↻) + tap the Power button. Hold Refresh until the Chrome logo appears.\n";
+                    text += "2. EC Power Drain: Unplug the AC charger, hold down the Power button for 15 seconds, reconnect the power adapter, and check if the charging LED illuminates solid amber or white.\n";
+                    text += "3. Display Brightness Test: Tap the Increase Brightness key (🔆) on the top keyboard row to ensure the backlight is not set to 0%.\n\n";
+                    text += "Does holding Refresh + Power bring up the Chrome boot screen?";
                 } else {
-                    text += "Got it, ChromeOS detected! Try signing out of your Google profile, testing Guest Mode, or clearing browser cache (Ctrl + Shift + Backspace). Let me know what happens!";
+                    text += "ChromeOS environment detected. Try testing Guest Mode, signing out of your Google account, or performing a hard refresh (Refresh + Power). Let me know what you observe!";
                 }
-            } 
-            // IPHONE / IOS WORKFLOW
-            else if (isIPhone) {
-                text += "Understood, iOS device context active! For iPhone connectivity or display issues:\n\n";
-                text += "1. Force Restart: Quickly press Volume Up, then Volume Down, then hold the Side Power Button until the Apple logo appears.\n";
-                text += "2. Reset Network Settings: Go to Settings > General > Transfer or Reset iPhone > Reset > Reset Network Settings.\n\n";
-                text += "Let me know if the Apple logo appears after the force restart!";
-            }
-            // WINDOWS WORKFLOW
-            else if (isWindows) {
-                text += "Windows PC context recognized! Recommended steps:\n\n";
-                text += "1. Driver Reset: Press Win + Ctrl + Shift + B to restart graphics drivers.\n";
-                text += "2. Safe Mode Boot: Hold Shift while clicking Restart to access Windows Diagnostic Recovery.\n\n";
-                text += "Did the screen flicker when pressing Win + Ctrl + Shift + B?";
-            } 
-            // GENERAL CONVERSATIONAL FALLBACK
-            else {
-                text += "I hear you. To make sure I give you the exact steps for your setup, what brand or operating system is your device using (e.g. Chromebook, Windows PC, Mac, iPhone)?\n\n";
-                text += "In the meantime, a 15-second power drain and testing with a secondary charger or cable is always a great first test!";
+            } else if (isIPhone) {
+                text += "iOS environment active. For iPhone network, battery, or boot anomalies:\n\n";
+                text += "1. Forced Reboot: Quick-press Volume Up, quick-press Volume Down, then hold the Side Power button until the Apple logo appears.\n";
+                text += "2. Reset Network Settings: Settings > General > Transfer or Reset iPhone > Reset > Reset Network Settings.\n\n";
+                text += "Did the forced reboot show the Apple logo?";
+            } else if (isWindows) {
+                text += "Windows environment detected. Here are targeted troubleshooting steps:\n\n";
+                text += "1. Graphics Driver Reset: Press Win + Ctrl + Shift + B to restart the display driver stack.\n";
+                text += "2. Safe Mode Recovery: Hold Shift while clicking Restart to enter Windows Recovery Environment.\n\n";
+                text += "Did the screen beep or flash when pressing Win + Ctrl + Shift + B?";
+            } else {
+                text += "I'm here to help fix your issue! To ensure I provide the exact steps for your workstation or mobile device, what brand or operating system are you using (e.g., Chromebook, Windows PC, Mac, iPhone)?\n\n";
+                text += "In the meantime, running a 15-second power drain and testing a secondary wall outlet is always recommended!";
             }
 
             return text;
@@ -847,7 +873,7 @@
                 urgencyLabel: urgencyLabel,
                 slaDue: Date.now() + (slaHours * 60 * 60 * 1000),
                 status: "Open",
-                aiLog: `Gemini AI Engine: Category=${category}, Excluded=[${tried}], Priority=${urgencyLabel}.`
+                aiLog: `AI Specialist Engine: Category=${category}, Excluded=[${tried}], Priority=${urgencyLabel}.`
             };
 
             tickets.unshift(newTicket);
@@ -859,11 +885,11 @@
             if (currentUser) {
                 switchTab('queue-tab');
             } else {
-                alert("* Ticket submitted! Log in as Staff/Admin to view active queues.");
+                alert("* Ticket submitted! Log in as Staff or Admin to view active queues.");
             }
         }
 
-        // --- QUEUE DISPLAY & SLA ACTIONS ---
+        // --- QUEUE DISPLAY & ACTIONS ---
         function renderQueue() {
             const categories = ["Hardware", "Software", "Network", "Account Access"];
             const urgencyRank = { "P1": 1, "P2": 2, "P3": 3, "P4": 4 };
@@ -969,14 +995,14 @@
             }
         }
 
-        // --- USER GOVERNANCE (FIXED ACCOUNT DELETION) ---
+        // --- USER GOVERNANCE & FIXED ACCOUNT DELETION ---
         function renderUsers() {
             const tbody = document.getElementById('userTableBody');
             const selectEl = document.getElementById('changePasswordUserSelect');
             tbody.innerHTML = "";
             selectEl.innerHTML = "";
 
-            users.forEach((u, index) => {
+            users.forEach(u => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid #444";
 
@@ -989,7 +1015,6 @@
                     canDelete = true;
                 }
 
-                // Table cells
                 const tdUser = document.createElement('td');
                 tdUser.style.padding = "8px";
                 tdUser.style.borderRight = "1px solid #fff";
@@ -1180,6 +1205,7 @@
 
         // Boot Initialization
         saveState();
+        initBGMFromStorage();
         updateTabLocks();
     </script>
 </body>
