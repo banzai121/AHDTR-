@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Determination Helpdesk Ticket Router</title>
+    <!-- Determination / Retro Monospace Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --border-color: #ffffff;
+            --highlight-color: #ffff00;
+            --font-family: 'VT323', 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            font-size: 20px;
+            line-height: 1.3;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Undertale Classic Pixel Borders */
+        .ut-box {
+            border: 4px solid var(--border-color);
+            background-color: #000;
+            padding: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: inset 0 0 0 2px #000;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #fff;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        button, .ut-btn {
+            background-color: #000;
+            color: #fff;
+            border: 3px solid #fff;
+            padding: 6px 16px;
+            font-family: var(--font-family);
+            font-size: 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.1s ease;
+        }
+
+        button:hover, .ut-btn:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+        button:active, .ut-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn.active {
+            background-color: #fff;
+            color: #000;
+        }
+
+        /* Main Grid */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        /* Input Controls */
+        input[type="text"], textarea, select {
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 10px;
+            font-family: var(--font-family);
+            font-size: 20px;
+            margin-top: 6px;
+            margin-bottom: 14px;
+            outline: none;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            border-color: #fff;
+            box-shadow: 0 0 8px #fff;
+        }
+
+        label {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Chatbot Window */
+        .chat-window {
+            height: 280px;
+            overflow-y: auto;
+            border: 2px solid #fff;
+            padding: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #050505;
+        }
+
+        .chat-msg {
+            max-width: 85%;
+            padding: 8px 12px;
+            border: 2px solid #fff;
+        }
+
+        .chat-msg.bot {
+            align-self: flex-start;
+            background-color: #000;
+        }
+
+        .chat-msg.user {
+            align-self: flex-end;
+            background-color: #fff;
+            color: #000;
+        }
+
+        /* Ticket Cards */
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .ticket-card {
+            border: 3px solid #fff;
+            padding: 14px;
+            position: relative;
+            background-color: #000;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px dashed #fff;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+        }
+
+        .priority-p1 {
+            color: #fff;
+            background-color: #000;
+            border: 2px solid #fff;
+            padding: 2px 8px;
+            animation: pulse-border 1s infinite alternate;
+        }
+
+        @keyframes pulse-border {
+            from { border-color: #fff; box-shadow: 0 0 2px #fff; }
+            to { border-color: #888; box-shadow: 0 0 10px #fff; }
+        }
+
+        .sla-timer {
+            font-weight: bold;
+        }
+
+        .sla-warning {
+            text-decoration: underline;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.92);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 800px;
+            background-color: #000;
+            border: 4px solid #fff;
+            padding: 24px;
+            position: relative;
+        }
+
+        /* Save Point Icon */
+        .save-point {
+            cursor: pointer;
+            display: inline-block;
+            animation: float 2s infinite ease-in-out;
+            font-size: 24px;
+            user-select: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Dialogue Box Style */
+        .undertale-dialogue {
+            border: 4px solid #fff;
+            padding: 16px;
+            min-height: 120px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            background-color: #000;
+            margin-top: 15px;
+        }
+
+        .dialogue-avatar {
+            width: 70px;
+            height: 70px;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            flex-shrink: 0;
+        }
+
+        .dialogue-text {
+            flex-grow: 1;
+            font-size: 22px;
+            white-space: pre-wrap;
+        }
+
+        /* Hidden Frame for Simulator */
+        #sans-frame-container {
+            display: none;
+            width: 100%;
+            height: 500px;
+            border: 3px solid #fff;
+            margin-top: 15px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .hidden { display: none !important; }
+        
+        .badge {
+            border: 1px solid #fff;
+            padding: 2px 6px;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="ut-box">
+        <div>
+            <h1>★ DETERMINATION TICKET ROUTER</h1>
+            <div style="font-size: 16px; color: #bbb;">AI Self-Service & Triaged Dispatch Engine</div>
+        </div>
+        <div class="header-controls">
+            <span class="save-point" id="savePointBtn" title="A strange energy fills you...">★</span>
+            <button id="bgmToggleBtn" onclick="toggleBGM()">BGM: OFF</button>
+            <button id="authBtn" onclick="openAuthModal()">LOGIN (GOB)</button>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('triage-tab')">[13] AI DIY Triage</button>
+        <button class="tab-btn" onclick="switchTab('queue-tab')">[14] Ticket Queue</button>
+        <button class="tab-btn" onclick="switchTab('admin-tab')">[15] Staff & Admin</button>
+        <button class="tab-btn" onclick="switchTab('search-tab')">[16] Ticket Search</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-container">
+
+        <!-- TAB 1: AI DIY TRIAGE & INTAKE -->
+        <div id="triage-tab" class="tab-content ut-box">
+            <h2>AI DIY Triage Assistant</h2>
+            <p style="margin-bottom: 12px; font-size: 18px; color: #ccc;">
+                Describe your hardware/software issue below. The AI assistant will recommend self-service steps, explicitly excluding solutions you have already attempted.
+            </p>
+
+            <div class="chat-window" id="chatWindow">
+                <div class="chat-msg bot">
+                    * Greetings. I am the Self-Service AI Triage Assistant. Please enter your affected Device, Problem Description, and Solutions Already Tried below.
+                </div>
+            </div>
+
+            <form id="triageForm" onsubmit="handleTriageSubmit(event)">
+                <label for="deviceInput">1. Affected Device / Workstation:</label>
+                <input type="text" id="deviceInput" placeholder="e.g., Dell XPS 15, Cisco IP Phone, Office Wi-Fi" required>
+
+                <label for="problemInput">2. Problem Description:</label>
+                <textarea id="problemInput" rows="3" placeholder="e.g., Screen flickers and turns completely black after boot" required></textarea>
+
+                <label for="triedInput">3. Solutions Already Tried (AI will exclude these):</label>
+                <input type="text" id="triedInput" placeholder="e.g., Restarted device twice, swapped power outlet">
+
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="submit" style="flex: 1;">Ask AI Assistant</button>
+                    <button type="button" onclick="forceEscalateTicket()" style="border-color: #fff; background-color: #222;">Route Direct Ticket</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TAB 2: ACTIVE TICKET QUEUE -->
+        <div id="queue-tab" class="tab-content ut-box hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Categorized Ticket Queue</h2>
+                <div>
+                    <label style="font-size: 16px;">Filter Department: </label>
+                    <select id="deptFilter" onchange="renderQueue()" style="width: auto; display: inline-block; padding: 4px;">
+                        <option value="ALL">All Departments</option>
+                        <option value="Hardware">Hardware (Helpdesk)</option>
+                        <option value="Software">Software (Software Team)</option>
+                        <option value="Network">Network (Networking Team)</option>
+                        <option value="Account Access">Account Access (Cybersecurity)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="ticketQueueList" class="ticket-list">
+                <!-- Dynamic Tickets Rendered Here -->
+            </div>
+        </div>
+
+        <!-- TAB 3: ADMIN & STAFF MANAGEMENT -->
+        <div id="admin-tab" class="tab-content ut-box hidden">
+            <h2>Staff Roster & Privilege Control</h2>
+            <p style="margin-bottom: 15px; font-size: 18px; color: #aaa;" id="adminStatusText">
+                Current Session: Standard User. (Log in as 'Gob' to grant or revoke Admin roles).
+            </p>
+
+            <table style="width: 100%; border-collapse: collapse; border: 2px solid #fff; margin-bottom: 20px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #fff; text-align: left;">
+                        <th style="padding: 8px; border-right: 1px solid #fff;">Staff Name</th>
+                        <th style="padding: 8px; border-right: 1px solid #fff;">Assigned Team</th>
+                        <th style="padding: 8px; border-right: 1px solid #fff;">Role</th>
+                        <th style="padding: 8px;">Admin Action</th>
+                    </tr>
+                </thead>
+                <tbody id="staffTableBody">
+                    <!-- Staff rows rendered here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TAB 4: TICKET SEARCH (FLOWEY 404/505) -->
+        <div id="search-tab" class="tab-content ut-box hidden">
+            <h2>Ticket Lookup</h2>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="searchTicketId" placeholder="Enter Ticket ID (e.g., TKT-1001)" style="margin-bottom: 0;">
+                <button onclick="searchTicket()">Search</button>
+            </div>
+
+            <div id="searchResultArea" style="margin-top: 20px;"></div>
+        </div>
+
+    </div>
+
+    <!-- UNDERTALE SAVE POINT MODAL -->
+    <div id="saveModal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>★ CHECKPOINT REACHED</h3>
+                <button onclick="closeSaveModal()">[X]</button>
+            </div>
+
+            <div class="undertale-dialogue">
+                <div class="dialogue-avatar">💀</div>
+                <div class="dialogue-text" id="dialogueText">* (Knowing that automated tickets are correctly routed to their departments... it fills you with DETERMINATION.)</div>
+            </div>
+
+            <div style="margin-top: 15px; display: flex; gap: 10px;" id="saveModalActions">
+                <button onclick="triggerSansFight()">[ Ready for a Bad Time? ]</button>
+                <button onclick="closeSaveModal()">[ Continue Work ]</button>
+            </div>
+
+            <div id="sans-frame-container">
+                <iframe id="sansIframe" src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 450px;">
+            <h3>System Authentication</h3>
+            <form onsubmit="handleLogin(event)" style="margin-top: 15px;">
+                <label for="authUsername">Username:</label>
+                <input type="text" id="authUsername" value="Gob" required>
+
+                <label for="authPassword">Password:</label>
+                <input type="password" id="authPassword" placeholder="Enter password" required style="width:100%; background:#000; color:#fff; border:2px solid #fff; padding:10px; font-family:var(--font-family); font-size:20px; margin-top:6px; margin-bottom:14px;">
+
+                <div style="display: flex; justify-content: space-between; gap: 10px;">
+                    <button type="submit">Log In</button>
+                    <button type="button" onclick="closeAuthModal()">Cancel</button>
+                </div>
+            </form>
+            <div style="font-size: 14px; color: #888; margin-top: 12px; text-align: center;">
+                Default Credentials: <b>Gob</b> / <b>Determination2026!</b>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- SYSTEM STATE & DATA ---
+        let currentUser = "Guest";
+        let isAdmin = false;
+        let bgmPlaying = false;
+        let audioCtx = null;
+        let bgmInterval = null;
+
+        // Tickets Initial Seed Data
+        let tickets = [
+            {
+                id: "TKT-1001",
+                device: "Dell XPS 15 Laptop",
+                problem: "Primary display screen is completely black after booting up.",
+                solutionsTried: "Restarted twice, checked power cord",
+                category: "Hardware",
+                assignedTeam: "Helpdesk",
+                urgency: "P1", // ACT NOW OR DIE
+                urgencyLabel: "P1 - ACT NOW OR DIE",
+                slaDue: Date.now() + (1 * 60 * 60 * 1000), // 1 hour
+                status: "Open",
+                aiLog: "GLiNER2.5-Decide: Intent=Hardware_Failure (0.96 confidence). Triangle Multi-Agent: Analyser extracted display failure; Triage Decider & Team Manager consensus routed to Helpdesk."
+            },
+            {
+                id: "TKT-1002",
+                device: "Workstation OS / Excel",
+                problem: "Microsoft Excel freezes instantly when opening financial ledger macro.",
+                solutionsTried: "Closed background apps",
+                category: "Software",
+                assignedTeam: "Software Team",
+                urgency: "P3",
+                urgencyLabel: "P3 - Standard Service",
+                slaDue: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+                status: "In Progress",
+                aiLog: "GLiNER2.5-Decide: Intent=Software_Crash. Triangle Multi-Agent: Software Team Manager accepted ticket."
+            },
+            {
+                id: "TKT-1003",
+                device: "Cisco VoIP Phone",
+                problem: "Dropped Wi-Fi connection and lost VPN tunnel in Conference Room B.",
+                solutionsTried: "Re-plugged Ethernet cable",
+                category: "Network",
+                assignedTeam: "Networking Team",
+                urgency: "P2",
+                urgencyLabel: "P2 - High Priority",
+                slaDue: Date.now() + (8 * 60 * 60 * 1000), // 8 hours
+                status: "Open",
+                aiLog: "GLiNER2.5-Decide: Intent=Network_Drop. Routed to Networking Team."
+            },
+            {
+                id: "TKT-1004",
+                device: "Active Directory Account",
+                problem: "User locked out after MFA token reset request failed.",
+                solutionsTried: "Tried self-service password portal",
+                category: "Account Access",
+                assignedTeam: "Cybersecurity",
+                urgency: "P4",
+                urgencyLabel: "P4 - Put off for 3 days",
+                slaDue: Date.now() + (72 * 60 * 60 * 1000), // 72 hours
+                status: "Open",
+                aiLog: "GLiNER2.5-Decide: Intent=Credential_Lockout. Routed to Cybersecurity."
+            }
+        ];
+
+        // Staff Personnel Data
+        let staff = [
+            { id: "STF-01", name: "Gob", team: "Helpdesk", role: "Admin" },
+            { id: "STF-02", name: "Papyrus", team: "Helpdesk", role: "Technician" },
+            { id: "STF-03", name: "Sans", team: "Software Team", role: "Technician" },
+            { id: "STF-04", name: "Undyne", team: "Networking Team", role: "Technician" },
+            { id: "STF-05", name: "Alphys", team: "Cybersecurity", role: "Technician" }
+        ];
+
+        // --- WEB AUDIO SYNTHESIZER (Undertale Sound Effects) ---
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Undertale Dialogue Blip Generator
+        function playTextBlip() {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "square";
+                osc.frequency.setValueAtTime(150 + Math.random() * 40, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.04);
+            } catch (e) {}
+        }
+
+        // Synthesized Retro Chiptune BGM (Grillby's / Retro Vibe Loop)
+        function toggleBGM() {
+            initAudio();
+            bgmPlaying = !bgmPlaying;
+            const btn = document.getElementById("bgmToggleBtn");
+
+            if (bgmPlaying) {
+                btn.innerText = "BGM: ON";
+                let noteIdx = 0;
+                const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+                bgmInterval = setInterval(() => {
+                    try {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = "sawtooth";
+                        const freq = notes[noteIdx % notes.length];
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 0.2);
+                        noteIdx++;
+                    } catch(e) {}
+                }, 250);
+            } else {
+                btn.innerText = "BGM: OFF";
+                if (bgmInterval) clearInterval(bgmInterval);
+            }
+        }
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            event.target.classList.add('active');
+
+            if (tabId === 'queue-tab') renderQueue();
+            if (tabId === 'admin-tab') renderStaff();
+        }
+
+        // --- DIY CHATBOT TRIAGE WORKFLOW ---
+        function handleTriageSubmit(e) {
+            e.preventDefault();
+            const device = document.getElementById('deviceInput').value.trim();
+            const problem = document.getElementById('problemInput').value.trim();
+            const tried = document.getElementById('triedInput').value.trim();
+
+            const chatWindow = document.getElementById('chatWindow');
+
+            // User Message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-msg user';
+            userMsg.innerText = `Device: ${device}\nProblem: ${problem}\nSolutions Tried: ${tried || 'None'}`;
+            chatWindow.appendChild(userMsg);
+
+            // AI Processing simulation (Excludes tried solutions)
+            setTimeout(() => {
+                const botMsg = document.createElement('div');
+                botMsg.className = 'chat-msg bot';
+                
+                let solutionText = "* [AI Triage Response]: Analyzing issue parameters...\n";
+                if (tried) {
+                    solutionText += `* Excluding previously attempted steps: [${tried}].\n`;
+                }
+                solutionText += "* Recommended DIY Step 1: Disconnect all peripheral cables, perform a 15-second hard power drain, and re-seat primary connectors.\n";
+                solutionText += "* Recommended DIY Step 2: Verify drivers and boot state in Safe Mode.\n\n";
+                solutionText += "* Did this fix your issue? If not, click 'Route Direct Ticket' below to assign this to a technical queue.";
+
+                botMsg.innerText = solutionText;
+                chatWindow.appendChild(botMsg);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                typeWriterSound();
+            }, 600);
+        }
+
+        function forceEscalateTicket() {
+            const device = document.getElementById('deviceInput').value.trim() || "Unspecified Workstation";
+            const problem = document.getElementById('problemInput').value.trim() || "General System Error";
+            const tried = document.getElementById('triedInput').value.trim() || "Basic restart";
+
+            // Determine Priority based on severity keywords
+            let urgency = "P3";
+            let urgencyLabel = "P3 - Standard Service";
+            let slaHours = 24;
+
+            const probLower = problem.toLowerCase();
+            if (probLower.includes("black") || probLower.includes("crash") || probLower.includes("outage") || probLower.includes("down") || probLower.includes("emergency")) {
+                urgency = "P1";
+                urgencyLabel = "P1 - ACT NOW OR DIE";
+                slaHours = 1;
+            } else if (probLower.includes("vpn") || probLower.includes("wifi") || probLower.includes("slow")) {
+                urgency = "P2";
+                urgencyLabel = "P2 - High Priority";
+                slaHours = 8;
+            }
+
+            // Category Determination
+            let category = "Hardware";
+            let team = "Helpdesk";
+
+            if (probLower.includes("excel") || probLower.includes("app") || probLower.includes("software") || probLower.includes("bug")) {
+                category = "Software";
+                team = "Software Team";
+            } else if (probLower.includes("wifi") || probLower.includes("vpn") || probLower.includes("network") || probLower.includes("internet")) {
+                category = "Network";
+                team = "Networking Team";
+            } else if (probLower.includes("password") || probLower.includes("login") || probLower.includes("mfa") || probLower.includes("access")) {
+                category = "Account Access";
+                team = "Cybersecurity";
+            }
+
+            const newTicket = {
+                id: "TKT-" + Math.floor(1000 + Math.random() * 9000),
+                device: device,
+                problem: problem,
+                solutionsTried: tried,
+                category: category,
+                assignedTeam: team,
+                urgency: urgency,
+                urgencyLabel: urgencyLabel,
+                slaDue: Date.now() + (slaHours * 60 * 60 * 1000),
+                status: "Open",
+                aiLog: `GLiNER2.5-Decide Intent classified (${category}). Triangle Agent: Analyser filtered [${tried}]. Team Manager (${team}) accepted assignment.`
+            };
+
+            tickets.unshift(newTicket);
+
+            alert(`* TICKET CREATED: ${newTicket.id}\n* Category: ${category}\n* Routed To: ${team}\n* Priority: ${urgencyLabel}`);
+            
+            document.getElementById('triageForm').reset();
+            switchTab('queue-tab');
+        }
+
+        // Typewriter Sound Simulation
+        function typeWriterSound() {
+            let count = 0;
+            const timer = setInterval(() => {
+                playTextBlip();
+                count++;
+                if (count > 8) clearInterval(timer);
+            }, 60);
+        }
+
+        // --- TICKET QUEUE & SLA COUNTDOWN TIMERS ---
+        function renderQueue() {
+            const queueList = document.getElementById('ticketQueueList');
+            const deptFilter = document.getElementById('deptFilter').value;
+
+            // Sort by Urgency ("ACT NOW OR DIE" P1 first)
+            const urgencyRank = { "P1": 1, "P2": 2, "P3": 3, "P4": 4 };
+            let sortedTickets = [...tickets].sort((a, b) => urgencyRank[a.urgency] - urgencyRank[b.urgency]);
+
+            if (deptFilter !== "ALL") {
+                sortedTickets = sortedTickets.filter(t => t.category === deptFilter);
+            }
+
+            queueList.innerHTML = "";
+
+            if (sortedTickets.length === 0) {
+                queueList.innerHTML = "<div class='ut-box'>* No active tickets found for this department filter.</div>";
+                return;
+            }
+
+            sortedTickets.forEach(t => {
+                const card = document.createElement('div');
+                card.className = "ticket-card";
+
+                const isP1 = t.urgency === "P1";
+                const priorityClass = isP1 ? "priority-p1" : "badge";
+
+                card.innerHTML = `
+                    <div class="ticket-header">
+                        <div>
+                            <strong>[${t.id}]</strong> <span class="badge">${t.category}</span>
+                        </div>
+                        <div>
+                            <span class="${priorityClass}">${t.urgencyLabel}</span>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <strong>Device:</strong> ${t.device}<br>
+                        <strong>Problem:</strong> ${t.problem}<br>
+                        <strong>Tried:</strong> <span style="color:#aaa;">${t.solutionsTried}</span>
+                    </div>
+                    <div style="font-size: 16px; border-top: 1px dashed #666; padding-top: 6px; margin-top: 6px; color: #ccc;">
+                        <strong>AI Routing Log:</strong> ${t.aiLog}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div>Assigned Team: <strong>${t.assignedTeam}</strong></div>
+                        <div>SLA Remaining: <span class="sla-timer" id="timer-${t.id}">Calculating...</span></div>
+                    </div>
+                `;
+                queueList.appendChild(card);
+            });
+
+            updateSLATimers();
+        }
+
+        function updateSLATimers() {
+            tickets.forEach(t => {
+                const el = document.getElementById(`timer-${t.id}`);
+                if (!el) return;
+
+                const diff = t.slaDue - Date.now();
+                if (diff <= 0) {
+                    el.innerText = "BREACHED!";
+                    el.classList.add("sla-warning");
+                } else {
+                    const hrs = Math.floor(diff / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                    el.innerText = `${hrs}h ${mins}m ${secs}s`;
+                }
+            });
+        }
+
+        setInterval(updateSLATimers, 1000);
+
+        // --- ADMIN & STAFF MANAGEMENT ---
+        function renderStaff() {
+            const tbody = document.getElementById('staffTableBody');
+            tbody.innerHTML = "";
+
+            staff.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid #444";
+
+                const canToggle = isAdmin && s.name !== "Gob"; // Gob is Super Admin
+
+                tr.innerHTML = `
+                    <td style="padding: 8px; border-right: 1px solid #fff;">${s.name}</td>
+                    <td style="padding: 8px; border-right: 1px solid #fff;">${s.team}</td>
+                    <td style="padding: 8px; border-right: 1px solid #fff;"><strong>${s.role}</strong></td>
+                    <td style="padding: 8px;">
+                        ${s.name === "Gob" ? "<em>Super Admin</em>" : 
+                          canToggle ? `<button onclick="toggleRole('\${s.id}')">Promote / Demote</button>` : 
+                          "<span style='color:#666;'>Admin Lock</span>"}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('adminStatusText').innerText = isAdmin 
+                ? `Logged in as Super Admin (${currentUser}). Full role control active.` 
+                : "Current Session: Standard User. Log in as 'Gob' to modify personnel privileges.";
+        }
+
+        function toggleRole(staffId) {
+            if (!isAdmin) return;
+            const person = staff.find(s => s.id === staffId);
+            if (person) {
+                person.role = (person.role === "Admin") ? "Technician" : "Admin";
+                renderStaff();
+            }
+        }
+
+        // --- AUTHENTICATION MODAL ---
+        function openAuthModal() {
+            document.getElementById('authModal').style.display = 'flex';
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').style.display = 'none';
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('authUsername').value.trim();
+            const pass = document.getElementById('authPassword').value.trim();
+
+            if (user.toLowerCase() === "gob" && pass === "Determination2026!") {
+                currentUser = "Gob";
+                isAdmin = true;
+                document.getElementById('authBtn').innerText = "LOGOUT (GOB)";
+                alert("* Access Granted. Welcome, Gob.");
+                closeAuthModal();
+                renderStaff();
+            } else {
+                alert("* Access Denied. Invalid credentials.");
+            }
+        }
+
+        // --- TICKET SEARCH & FLOWEY 404/505 STATE ---
+        function searchTicket() {
+            const query = document.getElementById('searchTicketId').value.trim().toUpperCase();
+            const area = document.getElementById('searchResultArea');
+
+            const found = tickets.find(t => t.id === query);
+
+            if (found) {
+                area.innerHTML = `
+                    <div class="ut-box">
+                        <h3>Ticket Found: ${found.id}</h3>
+                        <p><strong>Device:</strong> ${found.device}</p>
+                        <p><strong>Problem:</strong> ${found.problem}</p>
+                        <p><strong>Status:</strong> ${found.status} (${found.category} / ${found.assignedTeam})</p>
+                    </div>
+                `;
+            } else {
+                // FLOWEY 404 / 505 EASTER EGG
+                area.innerHTML = `
+                    <div class="undertale-dialogue" style="border-color: #fff;">
+                        <div class="dialogue-avatar">🌻</div>
+                        <div class="dialogue-text">* Howdy! I'm FLOWEY. Flowey the Flower!<br>* Error 404/505: Ticket '${query}' doesn't exist in this world.<br>* In this helpdesk, it's SOLVE or BE SOLVED! Hee hee...</div>
+                    </div>
+                `;
+                typeWriterSound();
+            }
+        }
+
+        // --- UNDERTALE SAVE POINT & BAD TIME SIMULATOR ---
+        document.getElementById('savePointBtn').addEventListener('click', () => {
+            document.getElementById('saveModal').style.display = 'flex';
+            typeWriterSound();
+        });
+
+        function closeSaveModal() {
+            document.getElementById('saveModal').style.display = 'none';
+            document.getElementById('sans-frame-container').style.display = 'none';
+            document.getElementById('sansIframe').src = "about:blank";
+            document.getElementById('saveModalActions').style.display = 'flex';
+        }
+
+        function triggerSansFight() {
+            document.getElementById('dialogueText').innerText = "* You feel your sins crawling on your back.\n* (Sans Fight Simulator initialized.)";
+            document.getElementById('saveModalActions').style.display = 'none';
+            
+            const frameContainer = document.getElementById('sans-frame-container');
+            frameContainer.style.display = 'block';
+            
+            // Embedded bad time simulator link without showing text link to user
+            document.getElementById('sansIframe').src = "https://jcw87.github.io/c2-sans-fight/";
+            typeWriterSound();
+        }
+    </script>
+</body>
+</html>
