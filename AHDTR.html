@@ -341,18 +341,21 @@
         <div id="triage-tab" class="tab-content ut-box">
             <h2>AI IT Specialist Support Portal</h2>
             
-            <!-- AUTO-STREAM LOCAL IN-BROWSER AI STATUS BOARD -->
-            <div class="ut-box" style="background-color: #111; border-color: var(--accent-green); padding: 12px; margin-top: 10px; margin-bottom: 15px;">
+            <!-- GOB-ONLY WASM / GGUF MANAGEMENT PANEL (HIDDEN FOR GUEST & STAFF) -->
+            <div id="aiControlPanel" class="ut-box hidden" style="background-color: #111; border-color: var(--accent-green); padding: 12px; margin-top: 10px; margin-bottom: 15px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div>
-                        <h3 style="color: var(--accent-green);">⚡ IN-BROWSER LOCAL AI ENGINE (WASM / GGUF)</h3>
+                        <h3 style="color: var(--accent-green);">⚡ IN-BROWSER LOCAL AI ENGINE (MASTER CONTROLS)</h3>
                         <div id="aiLoadStatus" style="font-size: 18px; color: #ffff55; margin-top: 4px;">
-                            Status: Initializing Qwen 2.5 Auto-Stream from Cloud Repository...
+                            Status: Initializing AI Engine...
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <button type="button" class="ut-btn" onclick="triggerModelReload()" style="border-color: var(--accent-green); color: var(--accent-green); font-size: 14px;">
-                            🔄 Reload Model
+                            🔄 Reload Active Model
+                        </button>
+                        <button type="button" class="ut-btn" onclick="resetToDefaultModel()" style="border-color: #ffff55; color: #ffff55; font-size: 14px;">
+                            ↩️ Reset Default Qwen
                         </button>
                         <label for="manualGgufInput" class="ut-btn" style="cursor: pointer; font-size: 14px; border-color: #fff;">
                             📂 Load Custom .GGUF
@@ -368,7 +371,7 @@
             </div>
 
             <p style="margin-bottom: 12px; font-size: 18px; color: #ccc;">
-                Chat freely with your self-contained local AI Specialist. Describes your system, error symptoms, and previous diagnostic attempts.
+                Chat freely with your self-contained local AI Specialist. Describe your system, error symptoms, and previous diagnostic attempts.
             </p>
 
             <div class="chat-window" id="chatWindow">
@@ -706,11 +709,14 @@
             const aBtn = document.getElementById('tab-btn-admin');
             const sBtn = document.getElementById('tab-btn-search');
             const gobBtn = document.getElementById('gobAudioBtn');
+            const aiControlPanel = document.getElementById('aiControlPanel');
 
             if (isGob) {
                 gobBtn.classList.remove('hidden');
+                if (aiControlPanel) aiControlPanel.classList.remove('hidden');
             } else {
                 gobBtn.classList.add('hidden');
+                if (aiControlPanel) aiControlPanel.classList.add('hidden');
             }
 
             if (isStaffOrAbove) {
@@ -1217,13 +1223,49 @@
         updateTabLocks();
     </script>
 
-    <!-- IN-BROWSER WEBASSEMBLY WLLAMA / QWEN 2.5 LOCAL AI ENGINE -->
+    <!-- IN-BROWSER WEBASSEMBLY WLLAMA / QWEN 2.5 LOCAL AI ENGINE WITH PERSISTENCE -->
     <script type="module">
         import { Wllama } from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/index.js';
         import WasmFromCDN from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/wasm-from-cdn.js';
 
         let wllamaInstance = null;
         let isModelLoaded = false;
+
+        // INDEXEDDB PERSISTENT GGUF FILE STORAGE HELPER
+        function openModelDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('UT_AI_Model_DB', 1);
+                req.onupgradeneeded = () => req.result.createObjectStore('models');
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function saveCustomModelToIDB(file) {
+            const db = await openModelDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('models', 'readwrite');
+                const store = tx.objectStore('models');
+                store.put(file, 'active_custom_gguf');
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function getCustomModelFromIDB() {
+            try {
+                const db = await openModelDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('models', 'readonly');
+                    const store = tx.objectStore('models');
+                    const req = store.get('active_custom_gguf');
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            } catch(e) {
+                return null;
+            }
+        }
 
         // Initialize Wllama Instance
         async function initWllama() {
@@ -1234,63 +1276,105 @@
             return wllamaInstance;
         }
 
-        // AUTO-BOOT MODEL STREAM FROM HUGGINGFACE
-        async function autoLoadQwenModel() {
+        // DEFAULT HF MODEL CONFIG
+        const DEFAULT_MODEL_CONFIG = {
+            type: 'hf',
+            repo: 'Qwen/Qwen2.5-0.5B-Instruct-GGUF',
+            file: 'qwen2.5-0.5b-instruct-q4_k_m.gguf'
+        };
+
+        // AUTO-BOOT MODEL STREAM OR RELOAD PERSISTED CUSTOM GGUF FROM STORAGE
+        async function bootActiveModel() {
             showProgressBar(true);
-            updateAIStatus("Connecting to Hugging Face repository (Qwen 2.5 0.5B)...", "#ffff55");
+
+            // Read saved active model config
+            let modelConfig = DEFAULT_MODEL_CONFIG;
+            const savedConfig = localStorage.getItem('ut_active_model_config');
+            if (savedConfig) {
+                try { modelConfig = JSON.parse(savedConfig); } catch(e) {}
+            }
 
             try {
                 const wllama = await initWllama();
-                
-                // Stream Qwen 2.5 0.5B Instruct GGUF (Optimized for WebAssembly RAM & fast Wi-Fi)
+
+                if (modelConfig.type === 'idb') {
+                    updateAIStatus(`Loading persisted custom model '${modelConfig.name}' from storage...`, "#ffff55");
+                    const storedBlob = await getCustomModelFromIDB();
+
+                    if (storedBlob) {
+                        await wllama.loadModel([ storedBlob ], {
+                            n_ctx: 2048,
+                            progressCallback: ({ loaded, total }) => {
+                                const pct = Math.round((loaded / total) * 100);
+                                setProgressBar(pct);
+                                updateAIStatus(`Loading stored '${modelConfig.name}': ${pct}%`, "#ffff55");
+                            }
+                        });
+
+                        isModelLoaded = true;
+                        updateAIStatus(`✓ Custom Model Active: ${modelConfig.name}`, "var(--accent-green)");
+                        showProgressBar(false);
+                        return;
+                    } else {
+                        console.warn("Stored model blob missing, falling back to Hugging Face default.");
+                        modelConfig = DEFAULT_MODEL_CONFIG;
+                    }
+                }
+
+                // Default / HF Stream route
+                updateAIStatus(`Connecting to Hugging Face repository (${modelConfig.file})...`, "#ffff55");
                 await wllama.loadModelFromHF(
-                    {
-                        repo: 'Qwen/Qwen2.5-0.5B-Instruct-GGUF',
-                        file: 'qwen2.5-0.5b-instruct-q4_k_m.gguf'
-                    },
+                    { repo: modelConfig.repo, file: modelConfig.file },
                     {
                         n_ctx: 2048,
                         progressCallback: ({ loaded, total }) => {
                             const pct = Math.round((loaded / total) * 100);
                             setProgressBar(pct);
-                            updateAIStatus(`Streaming Qwen 2.5 Model into Browser Cache: ${pct}%`, "#ffff55");
+                            updateAIStatus(`Streaming AI Engine into Memory: ${pct}%`, "#ffff55");
                         }
                     }
                 );
 
                 isModelLoaded = true;
+                localStorage.setItem('ut_active_model_config', JSON.stringify(modelConfig));
                 updateAIStatus("✓ Qwen 2.5 AI Engine Active (Cached in Browser Memory)", "var(--accent-green)");
                 showProgressBar(false);
             } catch (err) {
-                console.error("Auto-load failed:", err);
-                updateAIStatus(`❌ AI Auto-Load Failed: ${err.message}. Relying on local rule fallback.`, "#ff5555");
+                console.error("Model boot failed:", err);
+                updateAIStatus(`❌ AI Boot Failed: ${err.message}. Relying on local rule fallback.`, "#ff5555");
                 showProgressBar(false);
             }
         }
 
-        // MANUAL .GGUF FILE LOADER (FOR OVERRIDE / OFFLINE USE)
+        // MANUAL .GGUF FILE LOADER (GOB-ONLY - PERSISTS FILE IN INDEXEDDB)
         window.loadManualGGUF = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             showProgressBar(true);
-            updateAIStatus(`Loading custom file '${file.name}' into RAM...`, "#ffff55");
+            updateAIStatus(`Saving '${file.name}' into persistent storage...`, "#ffff55");
 
             try {
+                // Save custom model blob into browser IndexedDB
+                await saveCustomModelToIDB(file);
+
+                const modelConfig = { type: 'idb', name: file.name };
+                localStorage.setItem('ut_active_model_config', JSON.stringify(modelConfig));
+
                 const wllama = await initWllama();
                 await wllama.loadModel([ file ], {
                     n_ctx: 2048,
                     progressCallback: ({ loaded, total }) => {
                         const pct = Math.round((loaded / total) * 100);
                         setProgressBar(pct);
-                        updateAIStatus(`Loading GGUF into memory: ${pct}%`, "#ffff55");
+                        updateAIStatus(`Loading custom GGUF into memory: ${pct}%`, "#ffff55");
                     }
                 });
 
                 isModelLoaded = true;
-                updateAIStatus(`✓ Active Local GGUF Model: ${file.name}`, "var(--accent-green)");
+                updateAIStatus(`✓ Saved & Active Model: ${file.name}`, "var(--accent-green)");
                 showProgressBar(false);
-                alert(`* Custom model '${file.name}' successfully loaded into browser WebAssembly RAM!`);
+                alert(`* Model '${file.name}' saved to storage! It will now auto-load for all visitors on page refresh.`);
             } catch (err) {
                 console.error(err);
                 updateAIStatus(`❌ Failed to load custom GGUF: ${err.message}`, "#ff5555");
@@ -1299,7 +1383,14 @@
         };
 
         window.triggerModelReload = function() {
-            autoLoadQwenModel();
+            bootActiveModel();
+        };
+
+        window.resetToDefaultModel = function() {
+            if (confirm("* Reset active AI model back to default Qwen 2.5 0.5B?")) {
+                localStorage.setItem('ut_active_model_config', JSON.stringify(DEFAULT_MODEL_CONFIG));
+                bootActiveModel();
+            }
         };
 
         // DUCKDUCKGO WEB SEARCH CONTEXT ENRICHMENT
@@ -1349,7 +1440,7 @@
             // Render Bot Message Box
             const botMsg = document.createElement('div');
             botMsg.className = 'chat-msg bot';
-            botMsg.innerText = "* [Local Qwen AI thinking...]";
+            botMsg.innerText = "* [Local AI thinking...]";
             chatWindow.appendChild(botMsg);
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
@@ -1370,7 +1461,7 @@
                         max_tokens: 512,
                         temperature: 0.6,
                         onNewToken: (token, piece, currentText) => {
-                            botMsg.innerText = "* [Local Qwen AI]:\n" + currentText;
+                            botMsg.innerText = "* [Local AI Specialist]:\n" + currentText;
                             chatWindow.scrollTop = chatWindow.scrollHeight;
                         }
                     });
@@ -1402,16 +1493,18 @@
         }
 
         function showProgressBar(show) {
-            document.getElementById('progressBarBg').style.display = show ? 'block' : 'none';
+            const el = document.getElementById('progressBarBg');
+            if (el) el.style.display = show ? 'block' : 'none';
         }
 
         function setProgressBar(pct) {
-            document.getElementById('progressBarFill').style.width = `${pct}%`;
+            const el = document.getElementById('progressBarFill');
+            if (el) el.style.width = `${pct}%`;
         }
 
-        // Auto-boot model loading on page DOM Ready
+        // Auto-boot active stored model on page DOM Ready
         window.addEventListener('DOMContentLoaded', () => {
-            autoLoadQwenModel();
+            bootActiveModel();
         });
     </script>
 </body>
