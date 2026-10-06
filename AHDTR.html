@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Helpdesk Ticket Router</title>
+    <title>Determination Helpdesk Ticket Router</title>
     <!-- Determination / Retro Monospace Font -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <style>
@@ -130,7 +130,7 @@
         }
 
         .chat-window {
-            height: 320px;
+            height: 340px;
             overflow-y: auto;
             border: 2px solid #fff;
             padding: 12px;
@@ -292,7 +292,7 @@
         }
 
         .hidden { display: none !important; }
-        
+
         .badge {
             border: 1px solid #fff;
             padding: 2px 6px;
@@ -309,9 +309,6 @@
 </head>
 <body>
 
-    <!-- Hidden YouTube Player Iframe for Mettaton's Theme -->
-    <iframe id="mettatonAudioFrame" style="display:none;" src="about:blank" allow="autoplay"></iframe>
-
     <!-- Header -->
     <header class="ut-box">
         <div>
@@ -321,6 +318,8 @@
         <div class="header-controls">
             <span class="save-point" id="savePointBtn" title="A strange energy fills you...">★</span>
             <button id="bgmToggleBtn" onclick="toggleBGM()">BGM: METTATON (OFF)</button>
+            <button onclick="triggerAudioUpload()">🎵 Load Custom Audio</button>
+            <input type="file" id="audioFileInput" accept="audio/*" style="display:none;" onchange="handleAudioUpload(event)">
             <button id="authBtn" onclick="openAuthModal()">LOGIN</button>
         </div>
     </header>
@@ -336,22 +335,22 @@
     <!-- Main Content Area -->
     <div class="main-container">
 
-        <!-- TAB 1: GEMINI CONVERSATIONAL AI CHATBOT -->
+        <!-- TAB 1: GEMINI UNCONSTRAINED CONVERSATIONAL AI CHATBOT -->
         <div id="triage-tab" class="tab-content ut-box">
             <h2>Gemini Conversational AI Assistant</h2>
             <p style="margin-bottom: 12px; font-size: 18px; color: #ccc;">
-                Talk directly with the Gemini AI Assistant to troubleshoot issues step-by-step. If an issue remains unresolved, click 'Submit Formal Ticket'.
+                Chat freely with the Gemini AI Assistant to troubleshoot any technical issue. If you cannot solve it at home, click 'Submit Formal Ticket'.
             </p>
 
             <div class="chat-window" id="chatWindow">
                 <div class="chat-msg bot">
-* [Gemini AI]: Hello! I am your AI IT Assistant. What hardware, software, or network problem are you experiencing today? Let me know your device and what you've tried so far!
+* [Gemini AI]: Howdy! I am your Gemini AI Assistant. Tell me what's going wrong with your device, application, or network connection, and we can troubleshoot it together!
                 </div>
             </div>
 
             <form id="chatForm" onsubmit="handleChatSubmit(event)">
                 <label for="chatInput">Your Message / Query:</label>
-                <input type="text" id="chatInput" placeholder="e.g. My iPhone 13 won't connect to Wi-Fi. I already restarted it." required>
+                <input type="text" id="chatInput" placeholder="e.g. My iPhone 13 won't connect to Wi-Fi even after restarting." required>
 
                 <div style="display: flex; gap: 10px; margin-top: 6px;">
                     <button type="submit" style="flex: 1;">Send to Gemini</button>
@@ -392,7 +391,7 @@
 
         <!-- TAB 3: ADMIN & USER MANAGEMENT (ADMIN / GOB ONLY) -->
         <div id="admin-tab" class="tab-content ut-box hidden">
-            <h2>User Roster & Governance Panel</h2>
+            <h2>User Governance & Password Panel</h2>
             <p style="margin-bottom: 15px; font-size: 18px; color: #aaa;" id="adminStatusText">
                 Current Session: Guest.
             </p>
@@ -436,7 +435,7 @@
 
                     <!-- Change Password Form -->
                     <div style="border: 1px solid #fff; padding: 12px;">
-                        <h4>Reset Password</h4>
+                        <h4>Reset User Password</h4>
                         <form onsubmit="handleChangePassword(event)">
                             <label>Select User:</label>
                             <select id="changePasswordUserSelect"></select>
@@ -529,10 +528,12 @@
         </div>
     </div>
 
+    <audio id="customAudioElement" loop></audio>
+
     <script>
         // --- PERSISTENT STORAGE ---
         let users = JSON.parse(localStorage.getItem('ut_users')) || [
-            { username: "Gob", password: "Determination2026!", role: "Super Admin" }
+            { username: "Gob", password: "banzaiwashere", role: "Super Admin" }
         ];
 
         let tickets = JSON.parse(localStorage.getItem('ut_tickets')) || [];
@@ -540,13 +541,15 @@
         let currentUser = null; // null = Guest
         let bgmPlaying = false;
         let audioCtx = null;
+        let bgmInterval = null;
+        let customAudio = document.getElementById('customAudioElement');
 
         function saveState() {
             localStorage.setItem('ut_users', JSON.stringify(users));
             localStorage.setItem('ut_tickets', JSON.stringify(tickets));
         }
 
-        // --- AUDIO CONTROLS & METTATON YOUTUBE STREAM ---
+        // --- AUDIO CONTROLS & METTATON WEB AUDIO SYNTHESIZER ---
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -570,18 +573,65 @@
         }
 
         function toggleBGM() {
-            const frame = document.getElementById('mettatonAudioFrame');
+            if (customAudio.src) {
+                if (bgmPlaying) {
+                    customAudio.pause();
+                    bgmPlaying = false;
+                    document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM (OFF)";
+                } else {
+                    customAudio.play();
+                    bgmPlaying = true;
+                    document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM (ON)";
+                }
+                return;
+            }
+
+            initAudio();
+            bgmPlaying = !bgmPlaying;
             const btn = document.getElementById("bgmToggleBtn");
 
-            if (!bgmPlaying) {
-                // Stream Mettaton's theme from YouTube embed link
-                frame.src = "https://www.youtube.com/embed/Q9kDr4na0ls?autoplay=1&loop=1&playlist=Q9kDr4na0ls&enablejsapi=1";
-                bgmPlaying = true;
+            if (bgmPlaying) {
                 btn.innerText = "BGM: METTATON (ON)";
+                let noteIdx = 0;
+                // Mettaton "Metal Crusher" fast funk melody synth sequence
+                const melody = [293.66, 293.66, 587.33, 293.66, 349.23, 392.00, 293.66, 587.33, 440.00, 415.30, 392.00, 349.23];
+                
+                bgmInterval = setInterval(() => {
+                    try {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = "sawtooth";
+                        const freq = melody[noteIdx % melody.length];
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 0.12);
+                        noteIdx++;
+                    } catch(e) {}
+                }, 130);
             } else {
-                frame.src = "about:blank";
-                bgmPlaying = false;
                 btn.innerText = "BGM: METTATON (OFF)";
+                if (bgmInterval) clearInterval(bgmInterval);
+            }
+        }
+
+        function triggerAudioUpload() {
+            document.getElementById('audioFileInput').click();
+        }
+
+        function handleAudioUpload(event) {
+            const file = event.target.files;
+            if (file) {
+                const url = URL.createObjectURL(file);
+                customAudio.src = url;
+                if (bgmInterval) clearInterval(bgmInterval);
+                customAudio.play();
+                bgmPlaying = true;
+                document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM MP3 (ON)";
+                alert("* Custom audio file loaded and playing!");
             }
         }
 
@@ -624,16 +674,14 @@
         }
 
         function switchTab(tabId) {
-            // Unauthenticated check
             if (!currentUser && tabId !== 'triage-tab') {
-                alert("* RESTRICTED ACCESS: Please log in to view ticket queues or admin controls.");
+                alert("* RESTRICTED ACCESS: Please log in to access queue or admin features.");
                 openAuthModal();
                 return;
             }
 
-            // Staff check for Admin tab
             if (currentUser && currentUser.role === "Staff" && tabId === 'admin-tab') {
-                alert("* ACCESS DENIED: Staff members do not have user management privileges.");
+                alert("* ACCESS DENIED: Staff members do not have administrative privileges.");
                 return;
             }
 
@@ -648,7 +696,7 @@
             if (tabId === 'search-tab') document.getElementById('tab-btn-search').classList.add('active');
         }
 
-        // --- CONVERSATIONAL GEMINI AI CHATBOT ---
+        // --- UNCONSTRAINED CONVERSATIONAL GEMINI AI CHATBOT ---
         function handleChatSubmit(e) {
             e.preventDefault();
             const inputEl = document.getElementById('chatInput');
@@ -657,7 +705,7 @@
 
             const chatWindow = document.getElementById('chatWindow');
 
-            // Append User Query
+            // User Message
             const userMsg = document.createElement('div');
             userMsg.className = 'chat-msg user';
             userMsg.innerText = query;
@@ -666,42 +714,49 @@
             inputEl.value = "";
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
-            // Generate Conversational Gemini Response
+            // Fluid Conversational Gemini Response Generation
             setTimeout(() => {
                 const botMsg = document.createElement('div');
                 botMsg.className = 'chat-msg bot';
                 
-                let reply = generateGeminiResponse(query);
+                let reply = generateUnconstrainedGeminiResponse(query);
                 botMsg.innerText = reply;
                 chatWindow.appendChild(botMsg);
                 chatWindow.scrollTop = chatWindow.scrollHeight;
                 playTextBlip();
-            }, 300);
+            }, 250);
         }
 
-        function generateGeminiResponse(q) {
+        function generateUnconstrainedGeminiResponse(q) {
             const lower = q.toLowerCase();
             let text = "* [Gemini AI Assistant]: ";
 
             if (lower.includes("iphone") || lower.includes("apple") || lower.includes("ios") || lower.includes("phone")) {
-                if (lower.includes("wifi") || lower.includes("internet") || lower.includes("connection")) {
-                    text += "I see you're having internet connectivity issues on your iPhone.\n\nSince you've already tried basic restarts, please try these mobile-specific steps:\n";
-                    text += "1. Go to Settings > Wi-Fi > Tap your network 'i' icon > Select 'Forget This Network', then reconnect.\n";
-                    text += "2. Reset Network Settings: Settings > General > Transfer or Reset iPhone > Reset > Reset Network Settings.\n";
-                    text += "3. Toggle Airplane Mode ON for 10 seconds, then turn it off.\n\nDoes this fix your connection? If not, click 'Submit Formal Ticket' below!";
-                } else {
-                    text += "For iPhone/iOS issues, try force closing active apps, checking for software updates under Settings > General > Software Update, or performing a soft reset. If unresolved, feel free to log a ticket!";
-                }
-            } else if (lower.includes("excel") || lower.includes("software") || lower.includes("freeze") || lower.includes("crash")) {
-                text += "Software freeze or application crash detected.\n\nTry these steps:\n";
-                text += "1. Open the application in Safe Mode (hold CTRL while launching Excel/app).\n";
-                text += "2. Clear temporary cache files or disable third-party COM Add-ins.\n\nIf the issue persists, submit a formal ticket so the Software Team can inspect!";
-            } else if (lower.includes("screen") || lower.includes("black") || lower.includes("monitor") || lower.includes("laptop")) {
-                text += "Hardware / Display anomaly detected.\n\nRecommended troubleshooting:\n";
-                text += "1. Disconnect all dock/USB accessories and perform a 15-second hard power drain.\n";
-                text += "2. Re-seat display cables (HDMI/DisplayPort) or press Windows + Ctrl + Shift + B to restart graphics drivers.\n\nIf unresolved, escalate below to the Helpdesk!";
+                text += "That sounds frustrating! For mobile connectivity issues on an iPhone, here are some actionable steps you can try right now:\n\n";
+                text += "1. Forget and Reconnect: Go to Settings > Wi-Fi, tap the info icon next to your network, select 'Forget This Network', and log back in.\n";
+                text += "2. Reset Network Settings: Head to Settings > General > Transfer or Reset iPhone > Reset > Reset Network Settings. (Note: This will reset saved Wi-Fi passwords).\n";
+                text += "3. Toggle Airplane Mode: Turn Airplane Mode ON for 10 seconds, then turn it off to refresh cellular/Wi-Fi bands.\n\n";
+                text += "Did any of these work, or would you like me to guide you through another troubleshooting step?";
+            } else if (lower.includes("excel") || lower.includes("software") || lower.includes("freeze") || lower.includes("crash") || lower.includes("app")) {
+                text += "I can help with software freezes and crashes! Here is what we should test:\n\n";
+                text += "1. Safe Mode Boot: Try launching the app while holding the CTRL key to check if third-party add-ins or plugins are causing the crash.\n";
+                text += "2. Clear Cache: Delete temporary application cache files or run a repair install via Settings > Apps.\n";
+                text += "3. Resource Monitor: Check Task Manager (Ctrl + Shift + Esc) to see if memory or CPU usage is spiking.\n\n";
+                text += "Let me know what happens when you try launching in Safe Mode!";
+            } else if (lower.includes("screen") || lower.includes("black") || lower.includes("monitor") || lower.includes("display") || lower.includes("laptop")) {
+                text += "Display issues can stem from drivers or hardware connections. Let's try these solutions:\n\n";
+                text += "1. Driver Reset: Press Win + Ctrl + Shift + B on your keyboard to instantly restart your graphics display driver.\n";
+                text += "2. Power Drain: Unplug all external docks/cables and hold down the laptop power button for 15 seconds to discharge residual power.\n";
+                text += "3. Reseat Cables: Ensure your HDMI or DisplayPort cables are firmly seated or test with a secondary monitor.\n\n";
+                text += "Does your monitor display any signal or LED power light when connected?";
+            } else if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
+                text += "Hello! How can I assist you with your tech setup today? Feel free to describe any hardware, software, or account issues you're experiencing.";
             } else {
-                text += "Thanks for detailing your issue. I recommend checking physical cable/power connections, verifying device system updates, and running a soft reboot.\n\nIf these steps do not solve the problem, click 'Submit Formal Ticket' to route this directly to the appropriate IT department!";
+                text += "I understand. Let me help you troubleshoot this!\n\n";
+                text += "1. Restart Device: A full restart clears temporary system memory and active background conflicts.\n";
+                text += "2. Check Updates: Verify that your operating system or application has installed the latest stability patches.\n";
+                text += "3. Connection Check: Ensure physical cables, power sources, and network endpoints are securely connected.\n\n";
+                text += "Tell me more about what you see on screen, or click 'Submit Formal Ticket' if you'd like to escalate this directly to the IT team!";
             }
 
             return text;
@@ -762,7 +817,7 @@
                 urgencyLabel: urgencyLabel,
                 slaDue: Date.now() + (slaHours * 60 * 60 * 1000),
                 status: "Open",
-                aiLog: `Gemini AI Engine: Category=${category}, Excluded=[${tried}], Priority=${urgencyLabel}.`
+                aiLog: `Gemini AI Engine: Category=${category}, User Attempted=[${tried}], Priority=${urgencyLabel}.`
             };
 
             tickets.unshift(newTicket);
@@ -774,11 +829,11 @@
             if (currentUser) {
                 switchTab('queue-tab');
             } else {
-                alert("* Ticket submitted! Log in as Staff/Admin to view active queues.");
+                alert("* Ticket submitted! Log in as Staff or Admin to view active queues.");
             }
         }
 
-        // --- TICKET ACTIONS (RESOLVE / EXTEND SLA) ---
+        // --- TICKET QUEUE DISPLAY & ACTIONS ---
         function renderQueue() {
             const categories = ["Hardware", "Software", "Network", "Account Access"];
             const urgencyRank = { "P1": 1, "P2": 2, "P3": 3, "P4": 4 };
@@ -814,7 +869,7 @@
                         </div>
                         <div style="margin-bottom: 8px;">
                             <strong>Problem:</strong> ${t.problem}<br>
-                            <strong>Tried (Excluded):</strong> <span style="color:#aaa;">${t.solutionsTried}</span>
+                            <strong>Tried Previously:</strong> <span style="color:#aaa;">${t.solutionsTried}</span>
                         </div>
                         <div style="font-size: 16px; border-top: 1px dashed #555; padding-top: 4px; color: #ccc;">
                             <strong>AI Routing Log:</strong> ${t.aiLog}
@@ -848,7 +903,7 @@
         function extendSLA(ticketId) {
             const t = tickets.find(x => x.id === ticketId);
             if (t) {
-                t.slaDue += (4 * 60 * 60 * 1000); // add 4 hours
+                t.slaDue += (4 * 60 * 60 * 1000);
                 saveState();
                 alert(`* SLA target for Ticket '${ticketId}' extended by 4 hours.`);
                 updateSLATimers();
@@ -884,7 +939,7 @@
             }
         }
 
-        // --- USER & ADMIN MANAGEMENT ---
+        // --- USER & ADMIN MANAGEMENT (FIXED REMOVE BUTTON) ---
         function renderUsers() {
             const tbody = document.getElementById('userTableBody');
             const selectEl = document.getElementById('changePasswordUserSelect');
@@ -984,7 +1039,7 @@
             if (confirm(`* Are you sure you want to delete user '${username}'?`)) {
                 users = users.filter(u => u.username !== username);
                 saveState();
-                alert(`* User '${username}' removed.`);
+                alert(`* User '${username}' removed successfully.`);
                 renderUsers();
             }
         }
