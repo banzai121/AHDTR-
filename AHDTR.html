@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Determination Helpdesk Ticket Router</title>
-    <!-- Determination / Retro Monospace Font -->
+    <!-- Determination / Retro Monospace Typography -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <style>
         :root {
@@ -130,7 +130,7 @@
         }
 
         .chat-window {
-            height: 340px;
+            height: 360px;
             overflow-y: auto;
             border: 2px solid #fff;
             padding: 12px;
@@ -317,10 +317,10 @@
         </div>
         <div class="header-controls">
             <span class="save-point" id="savePointBtn" title="A strange energy fills you...">★</span>
-            <button id="bgmToggleBtn" onclick="toggleBGM()">BGM: METTATON (OFF)</button>
-            <button onclick="triggerAudioUpload()">🎵 Load Custom Audio</button>
+            <button id="bgmToggleBtn" onclick="toggleBGM()">BGM: GLAMOUR (OFF)</button>
+            <button onclick="triggerAudioUpload()">🎵 Load MP3 Audio</button>
             <input type="file" id="audioFileInput" accept="audio/*" style="display:none;" onchange="handleAudioUpload(event)">
-            <button id="authBtn" onclick="openAuthModal()">LOGIN</button>
+            <button id="authBtn" onclick="handleAuthAction()">LOGIN</button>
         </div>
     </header>
 
@@ -335,22 +335,20 @@
     <!-- Main Content Area -->
     <div class="main-container">
 
-        <!-- TAB 1: GEMINI UNCONSTRAINED CONVERSATIONAL AI CHATBOT -->
+        <!-- TAB 1: DYNAMIC GEMINI IT HELPDESK CHATBOT -->
         <div id="triage-tab" class="tab-content ut-box">
-            <h2>Gemini Conversational AI Assistant</h2>
+            <h2>Gemini IT Helpdesk Conversational Assistant</h2>
             <p style="margin-bottom: 12px; font-size: 18px; color: #ccc;">
-                Chat freely with the Gemini AI Assistant to troubleshoot any technical issue. If you cannot solve it at home, click 'Submit Formal Ticket'.
+                Describe your issue below. The Gemini AI agent will analyze your device context dynamically and troubleshoot step-by-step.
             </p>
 
             <div class="chat-window" id="chatWindow">
-                <div class="chat-msg bot">
-* [Gemini AI]: Howdy! I am your Gemini AI Assistant. Tell me what's going wrong with your device, application, or network connection, and we can troubleshoot it together!
-                </div>
+                <div class="chat-msg bot">* [Gemini IT Helpdesk Specialist]: Greetings! I am your AI IT Support Worker. Describe your hardware, software, or networking problem, and let me know what device you are using so we can fix it!</div>
             </div>
 
             <form id="chatForm" onsubmit="handleChatSubmit(event)">
                 <label for="chatInput">Your Message / Query:</label>
-                <input type="text" id="chatInput" placeholder="e.g. My iPhone 13 won't connect to Wi-Fi even after restarting." required>
+                <input type="text" id="chatInput" placeholder="e.g. My Dell Chromebook flashes green and goes black." required>
 
                 <div style="display: flex; gap: 10px; margin-top: 6px;">
                     <button type="submit" style="flex: 1;">Send to Gemini</button>
@@ -389,11 +387,11 @@
             </div>
         </div>
 
-        <!-- TAB 3: ADMIN & USER MANAGEMENT (ADMIN / GOB ONLY) -->
+        <!-- TAB 3: ADMIN & USER GOVERNANCE (LOCKED FOR NON-ADMINS) -->
         <div id="admin-tab" class="tab-content ut-box hidden">
-            <h2>User Governance & Password Panel</h2>
+            <h2>User Governance & Access Control</h2>
             <p style="margin-bottom: 15px; font-size: 18px; color: #aaa;" id="adminStatusText">
-                Current Session: Guest.
+                Current Session: Unauthenticated Guest.
             </p>
 
             <table style="width: 100%; border-collapse: collapse; border: 2px solid #fff; margin-bottom: 20px;">
@@ -405,7 +403,7 @@
                     </tr>
                 </thead>
                 <tbody id="userTableBody">
-                    <!-- User rows rendered dynamically -->
+                    <!-- User records generated dynamically -->
                 </tbody>
             </table>
 
@@ -433,7 +431,7 @@
                         </form>
                     </div>
 
-                    <!-- Change Password Form -->
+                    <!-- Reset Password Form -->
                     <div style="border: 1px solid #fff; padding: 12px;">
                         <h4>Reset User Password</h4>
                         <form onsubmit="handleChangePassword(event)">
@@ -450,7 +448,7 @@
             </div>
         </div>
 
-        <!-- TAB 4: TICKET LOOKUP -->
+        <!-- TAB 4: TICKET SEARCH -->
         <div id="search-tab" class="tab-content ut-box hidden">
             <h2>Ticket Search</h2>
             <div style="display: flex; gap: 10px;">
@@ -469,13 +467,13 @@
             <h3>Submit Formal Ticket</h3>
             <form onsubmit="handleTicketEscalation(event)" style="margin-top: 15px;">
                 <label>Affected Device / System:</label>
-                <input type="text" id="modalDevice" placeholder="e.g. iPhone 13, Dell Workstation" required>
+                <input type="text" id="modalDevice" placeholder="e.g. Dell Chromebook 11, iPhone 13" required>
 
                 <label>Problem Summary:</label>
-                <textarea id="modalProblem" rows="3" placeholder="e.g. Wi-Fi drops continuously after OS update" required></textarea>
+                <textarea id="modalProblem" rows="3" placeholder="e.g. Screen flashes green and goes black on boot" required></textarea>
 
                 <label>Solutions Already Tried:</label>
-                <input type="text" id="modalTried" placeholder="e.g. Network reset, rebooted device">
+                <input type="text" id="modalTried" placeholder="e.g. Hard refresh, charger swap">
 
                 <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
                     <button type="submit">Route Ticket</button>
@@ -495,7 +493,7 @@
 
             <div class="undertale-dialogue">
                 <div class="dialogue-avatar">🤖</div>
-                <div class="dialogue-text" id="dialogueText">* (A fabulous metallic presence fills the room... It fills you with DETERMINATION.)</div>
+                <div class="dialogue-text" id="dialogueText">* (A fabulous metallic presence fills the room... Death by Glamour begins! It fills you with DETERMINATION.)</div>
             </div>
 
             <div style="margin-top: 15px; display: flex; gap: 10px;" id="saveModalActions">
@@ -531,17 +529,18 @@
     <audio id="customAudioElement" loop></audio>
 
     <script>
-        // --- PERSISTENT STORAGE ---
+        // --- LOCAL STORAGE PERSISTENCE ---
         let users = JSON.parse(localStorage.getItem('ut_users')) || [
             { username: "Gob", password: "banzaiwashere", role: "Super Admin" }
         ];
 
         let tickets = JSON.parse(localStorage.getItem('ut_tickets')) || [];
 
-        let currentUser = null; // null = Guest
+        let currentUser = null; // null = Unauthenticated Guest
         let bgmPlaying = false;
         let audioCtx = null;
         let bgmInterval = null;
+        let chatHistory = []; // Dynamic Conversation Memory State
         let customAudio = document.getElementById('customAudioElement');
 
         function saveState() {
@@ -549,7 +548,7 @@
             localStorage.setItem('ut_tickets', JSON.stringify(tickets));
         }
 
-        // --- AUDIO CONTROLS & METTATON WEB AUDIO SYNTHESIZER ---
+        // --- WEB AUDIO SYNTHESIZER (DEATH BY GLAMOUR METTATON THEME) ---
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -572,16 +571,17 @@
             } catch (e) {}
         }
 
+        // Synthesized "Death by Glamour" Disco Synth Sequence
         function toggleBGM() {
             if (customAudio.src) {
                 if (bgmPlaying) {
                     customAudio.pause();
                     bgmPlaying = false;
-                    document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM (OFF)";
+                    document.getElementById("bgmToggleBtn").innerText = "BGM: GLAMOUR (OFF)";
                 } else {
                     customAudio.play();
                     bgmPlaying = true;
-                    document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM (ON)";
+                    document.getElementById("bgmToggleBtn").innerText = "BGM: GLAMOUR (ON)";
                 }
                 return;
             }
@@ -591,29 +591,29 @@
             const btn = document.getElementById("bgmToggleBtn");
 
             if (bgmPlaying) {
-                btn.innerText = "BGM: METTATON (ON)";
+                btn.innerText = "BGM: GLAMOUR (ON)";
                 let noteIdx = 0;
-                // Mettaton "Metal Crusher" fast funk melody synth sequence
-                const melody = [293.66, 293.66, 587.33, 293.66, 349.23, 392.00, 293.66, 587.33, 440.00, 415.30, 392.00, 349.23];
+                // Death by Glamour synth bassline/riff notes (F#, A, C#, B, G#, E)
+                const glamourRiff = [369.99, 440.00, 554.37, 493.88, 415.30, 329.63, 369.99, 554.37];
                 
                 bgmInterval = setInterval(() => {
                     try {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
                         osc.type = "sawtooth";
-                        const freq = melody[noteIdx % melody.length];
+                        const freq = glamourRiff[noteIdx % glamourRiff.length];
                         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
                         gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.11);
                         osc.connect(gain);
                         gain.connect(audioCtx.destination);
                         osc.start();
-                        osc.stop(audioCtx.currentTime + 0.12);
+                        osc.stop(audioCtx.currentTime + 0.11);
                         noteIdx++;
                     } catch(e) {}
-                }, 130);
+                }, 120);
             } else {
-                btn.innerText = "BGM: METTATON (OFF)";
+                btn.innerText = "BGM: GLAMOUR (OFF)";
                 if (bgmInterval) clearInterval(bgmInterval);
             }
         }
@@ -631,11 +631,24 @@
                 customAudio.play();
                 bgmPlaying = true;
                 document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM MP3 (ON)";
-                alert("* Custom audio file loaded and playing!");
+                alert("* Death by Glamour MP3 loaded and playing!");
             }
         }
 
-        // --- TAB ACCESS & ROLE SECURITY ---
+        // --- AUTHENTICATION & LOGOUT CONTROLS ---
+        function handleAuthAction() {
+            if (currentUser) {
+                // Logout Action
+                currentUser = null;
+                document.getElementById('authBtn').innerText = "LOGIN";
+                alert("* You have logged out successfully.");
+                updateTabLocks();
+                switchTab('triage-tab');
+            } else {
+                openAuthModal();
+            }
+        }
+
         function updateTabLocks() {
             const isAuth = currentUser !== null;
             const isStaffOrAbove = isAuth && (currentUser.role === "Staff" || currentUser.role === "Admin" || currentUser.role === "Super Admin");
@@ -668,8 +681,10 @@
             const headerBadge = document.getElementById('userHeaderBadge');
             if (currentUser) {
                 headerBadge.innerText = `Session: ${currentUser.username} [${currentUser.role}]`;
+                document.getElementById('authBtn').innerText = `LOGOUT (${currentUser.username.toUpperCase()})`;
             } else {
                 headerBadge.innerText = "Session: Guest (Unauthenticated)";
+                document.getElementById('authBtn').innerText = "LOGIN";
             }
         }
 
@@ -681,7 +696,7 @@
             }
 
             if (currentUser && currentUser.role === "Staff" && tabId === 'admin-tab') {
-                alert("* ACCESS DENIED: Staff members do not have administrative privileges.");
+                alert("* ACCESS DENIED: Staff members do not have user management privileges.");
                 return;
             }
 
@@ -696,7 +711,7 @@
             if (tabId === 'search-tab') document.getElementById('tab-btn-search').classList.add('active');
         }
 
-        // --- UNCONSTRAINED CONVERSATIONAL GEMINI AI CHATBOT ---
+        // --- CONVERSATIONAL GEMINI AI AGENT ---
         function handleChatSubmit(e) {
             e.preventDefault();
             const inputEl = document.getElementById('chatInput');
@@ -705,7 +720,7 @@
 
             const chatWindow = document.getElementById('chatWindow');
 
-            // User Message
+            // Add User Message
             const userMsg = document.createElement('div');
             userMsg.className = 'chat-msg user';
             userMsg.innerText = query;
@@ -714,55 +729,70 @@
             inputEl.value = "";
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
-            // Fluid Conversational Gemini Response Generation
+            chatHistory.push({ role: "user", text: query });
+
+            // Generate Context-Aware Gemini AI Response
             setTimeout(() => {
                 const botMsg = document.createElement('div');
                 botMsg.className = 'chat-msg bot';
                 
-                let reply = generateUnconstrainedGeminiResponse(query);
+                let reply = generateDynamicGeminiResponse(query, chatHistory);
                 botMsg.innerText = reply;
                 chatWindow.appendChild(botMsg);
                 chatWindow.scrollTop = chatWindow.scrollHeight;
+                
+                chatHistory.push({ role: "model", text: reply });
                 playTextBlip();
             }, 250);
         }
 
-        function generateUnconstrainedGeminiResponse(q) {
-            const lower = q.toLowerCase();
-            let text = "* [Gemini AI Assistant]: ";
+        function generateDynamicGeminiResponse(currentQuery, history) {
+            const lowerQuery = currentQuery.toLowerCase();
+            const fullContext = history.map(h => h.text.toLowerCase()).join(" ");
 
-            if (lower.includes("iphone") || lower.includes("apple") || lower.includes("ios") || lower.includes("phone")) {
-                text += "That sounds frustrating! For mobile connectivity issues on an iPhone, here are some actionable steps you can try right now:\n\n";
-                text += "1. Forget and Reconnect: Go to Settings > Wi-Fi, tap the info icon next to your network, select 'Forget This Network', and log back in.\n";
-                text += "2. Reset Network Settings: Head to Settings > General > Transfer or Reset iPhone > Reset > Reset Network Settings. (Note: This will reset saved Wi-Fi passwords).\n";
-                text += "3. Toggle Airplane Mode: Turn Airplane Mode ON for 10 seconds, then turn it off to refresh cellular/Wi-Fi bands.\n\n";
-                text += "Did any of these work, or would you like me to guide you through another troubleshooting step?";
-            } else if (lower.includes("excel") || lower.includes("software") || lower.includes("freeze") || lower.includes("crash") || lower.includes("app")) {
-                text += "I can help with software freezes and crashes! Here is what we should test:\n\n";
-                text += "1. Safe Mode Boot: Try launching the app while holding the CTRL key to check if third-party add-ins or plugins are causing the crash.\n";
-                text += "2. Clear Cache: Delete temporary application cache files or run a repair install via Settings > Apps.\n";
-                text += "3. Resource Monitor: Check Task Manager (Ctrl + Shift + Esc) to see if memory or CPU usage is spiking.\n\n";
-                text += "Let me know what happens when you try launching in Safe Mode!";
-            } else if (lower.includes("screen") || lower.includes("black") || lower.includes("monitor") || lower.includes("display") || lower.includes("laptop")) {
-                text += "Display issues can stem from drivers or hardware connections. Let's try these solutions:\n\n";
-                text += "1. Driver Reset: Press Win + Ctrl + Shift + B on your keyboard to instantly restart your graphics display driver.\n";
-                text += "2. Power Drain: Unplug all external docks/cables and hold down the laptop power button for 15 seconds to discharge residual power.\n";
-                text += "3. Reseat Cables: Ensure your HDMI or DisplayPort cables are firmly seated or test with a secondary monitor.\n\n";
-                text += "Does your monitor display any signal or LED power light when connected?";
-            } else if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
-                text += "Hello! How can I assist you with your tech setup today? Feel free to describe any hardware, software, or account issues you're experiencing.";
-            } else {
-                text += "I understand. Let me help you troubleshoot this!\n\n";
-                text += "1. Restart Device: A full restart clears temporary system memory and active background conflicts.\n";
-                text += "2. Check Updates: Verify that your operating system or application has installed the latest stability patches.\n";
-                text += "3. Connection Check: Ensure physical cables, power sources, and network endpoints are securely connected.\n\n";
-                text += "Tell me more about what you see on screen, or click 'Submit Formal Ticket' if you'd like to escalate this directly to the IT team!";
+            let isChromebook = fullContext.includes("chromebook") || lowerQuery.includes("chrome") || lowerQuery.includes("cros");
+            let isIPhone = fullContext.includes("iphone") || lowerQuery.includes("ios") || lowerQuery.includes("apple");
+            let isWindows = fullContext.includes("windows") || lowerQuery.includes("pc") || lowerQuery.includes("dell xps");
+
+            let text = "* [Gemini IT Helpdesk Specialist]: ";
+
+            // CHROMEBOOK / CHROMEOS WORKFLOW
+            if (isChromebook) {
+                if (lowerQuery.includes("green") || lowerQuery.includes("flash") || lowerQuery.includes("black") || lowerQuery.includes("turn on")) {
+                    text += "I see you're working on a Chromebook with a display indicator flashing green before turning black. This usually indicates a power delivery loop or ChromeOS boot freeze.\n\n";
+                    text += "Here are the exact ChromeOS hardware steps to fix this:\n";
+                    text += "1. Hard Reset ChromeOS Hardware: Press and hold the Refresh key (↻) + tap the Power button. Keep holding Refresh until your Chromebook boots up.\n";
+                    text += "2. Power Drain: Disconnect the charger, hold down the Power button for 15 seconds, re-plug the charger, and look for the LED charge light.\n";
+                    text += "3. Display Brightness Check: Tap the Increase Brightness key (🔆) on the top row of your keyboard to verify the screen isn't dimmed to 0%.\n\n";
+                    text += "Did the Refresh + Power hard reset trigger the Chrome boot logo?";
+                } else {
+                    text += "Got it, ChromeOS detected! Try signing out of your Google profile, testing Guest Mode, or clearing browser cache (Ctrl + Shift + Backspace). Let me know what happens!";
+                }
+            } 
+            // IPHONE / IOS WORKFLOW
+            else if (isIPhone) {
+                text += "Understood, iOS device context active! For iPhone connectivity or display issues:\n\n";
+                text += "1. Force Restart: Quickly press Volume Up, then Volume Down, then hold the Side Power Button until the Apple logo appears.\n";
+                text += "2. Reset Network Settings: Go to Settings > General > Transfer or Reset iPhone > Reset > Reset Network Settings.\n\n";
+                text += "Let me know if the Apple logo appears after the force restart!";
+            }
+            // WINDOWS WORKFLOW
+            else if (isWindows) {
+                text += "Windows PC context recognized! Recommended steps:\n\n";
+                text += "1. Driver Reset: Press Win + Ctrl + Shift + B to restart graphics drivers.\n";
+                text += "2. Safe Mode Boot: Hold Shift while clicking Restart to access Windows Diagnostic Recovery.\n\n";
+                text += "Did the screen flicker when pressing Win + Ctrl + Shift + B?";
+            } 
+            // GENERAL CONVERSATIONAL FALLBACK
+            else {
+                text += "I hear you. To make sure I give you the exact steps for your setup, what brand or operating system is your device using (e.g. Chromebook, Windows PC, Mac, iPhone)?\n\n";
+                text += "In the meantime, a 15-second power drain and testing with a secondary charger or cable is always a great first test!";
             }
 
             return text;
         }
 
-        // --- FORMAL TICKET MODAL & ESCALATION ---
+        // --- FORMAL TICKET ESCALATION MODAL ---
         function openDirectTicketModal() {
             document.getElementById('ticketModal').style.display = 'flex';
         }
@@ -775,14 +805,14 @@
             e.preventDefault();
             const device = document.getElementById('modalDevice').value.trim();
             const problem = document.getElementById('modalProblem').value.trim();
-            const tried = document.getElementById('modalTried').value.trim() || "Basic troubleshooting";
+            const tried = document.getElementById('modalTried').value.trim() || "Basic reboot";
 
             let urgency = "P3";
             let urgencyLabel = "P3 - Standard Service";
             let slaHours = 24;
 
             const probLower = problem.toLowerCase();
-            if (probLower.includes("black") || probLower.includes("crash") || probLower.includes("outage") || probLower.includes("down") || probLower.includes("emergency") || probLower.includes("die")) {
+            if (probLower.includes("black") || probLower.includes("crash") || probLower.includes("outage") || probLower.includes("down") || probLower.includes("emergency") || probLower.includes("flash")) {
                 urgency = "P1";
                 urgencyLabel = "P1 - ACT NOW OR DIE";
                 slaHours = 1;
@@ -798,7 +828,7 @@
             if (probLower.includes("excel") || probLower.includes("app") || probLower.includes("software") || probLower.includes("bug")) {
                 category = "Software";
                 team = "Software Team";
-            } else if (probLower.includes("wifi") || probLower.includes("vpn") || probLower.includes("network") || probLower.includes("internet") || probLower.includes("iphone")) {
+            } else if (probLower.includes("wifi") || probLower.includes("vpn") || probLower.includes("network") || probLower.includes("internet")) {
                 category = "Network";
                 team = "Networking Team";
             } else if (probLower.includes("password") || probLower.includes("login") || probLower.includes("mfa") || probLower.includes("access")) {
@@ -817,7 +847,7 @@
                 urgencyLabel: urgencyLabel,
                 slaDue: Date.now() + (slaHours * 60 * 60 * 1000),
                 status: "Open",
-                aiLog: `Gemini AI Engine: Category=${category}, User Attempted=[${tried}], Priority=${urgencyLabel}.`
+                aiLog: `Gemini AI Engine: Category=${category}, Excluded=[${tried}], Priority=${urgencyLabel}.`
             };
 
             tickets.unshift(newTicket);
@@ -829,11 +859,11 @@
             if (currentUser) {
                 switchTab('queue-tab');
             } else {
-                alert("* Ticket submitted! Log in as Staff or Admin to view active queues.");
+                alert("* Ticket submitted! Log in as Staff/Admin to view active queues.");
             }
         }
 
-        // --- TICKET QUEUE DISPLAY & ACTIONS ---
+        // --- QUEUE DISPLAY & SLA ACTIONS ---
         function renderQueue() {
             const categories = ["Hardware", "Software", "Network", "Account Access"];
             const urgencyRank = { "P1": 1, "P2": 2, "P3": 3, "P4": 4 };
@@ -939,14 +969,14 @@
             }
         }
 
-        // --- USER & ADMIN MANAGEMENT (FIXED REMOVE BUTTON) ---
+        // --- USER GOVERNANCE (FIXED ACCOUNT DELETION) ---
         function renderUsers() {
             const tbody = document.getElementById('userTableBody');
             const selectEl = document.getElementById('changePasswordUserSelect');
             tbody.innerHTML = "";
             selectEl.innerHTML = "";
 
-            users.forEach(u => {
+            users.forEach((u, index) => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid #444";
 
@@ -959,13 +989,34 @@
                     canDelete = true;
                 }
 
-                tr.innerHTML = `
-                    <td style="padding: 8px; border-right: 1px solid #fff;">${u.username}</td>
-                    <td style="padding: 8px; border-right: 1px solid #fff;"><strong>${u.role}</strong></td>
-                    <td style="padding: 8px;">
-                        ${canDelete ? `<button onclick="deleteUser('\${u.username}')">Remove</button>` : `<span style='color:#666;'>Protected</span>`}
-                    </td>
-                `;
+                // Table cells
+                const tdUser = document.createElement('td');
+                tdUser.style.padding = "8px";
+                tdUser.style.borderRight = "1px solid #fff";
+                tdUser.innerText = u.username;
+
+                const tdRole = document.createElement('td');
+                tdRole.style.padding = "8px";
+                tdRole.style.borderRight = "1px solid #fff";
+                tdRole.innerHTML = `<strong>${u.role}</strong>`;
+
+                const tdAction = document.createElement('td');
+                tdAction.style.padding = "8px";
+
+                if (canDelete) {
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerText = "Remove";
+                    removeBtn.onclick = function() {
+                        deleteUserAccount(u.username);
+                    };
+                    tdAction.appendChild(removeBtn);
+                } else {
+                    tdAction.innerHTML = "<span style='color:#666;'>Protected</span>";
+                }
+
+                tr.appendChild(tdUser);
+                tr.appendChild(tdRole);
+                tr.appendChild(tdAction);
                 tbody.appendChild(tr);
 
                 const opt = document.createElement('option');
@@ -985,7 +1036,7 @@
                     controlPanel.classList.add('hidden');
                 }
             } else {
-                statusText.innerText = "Current Session: Guest. (Log in as Admin to manage users).";
+                statusText.innerText = "Current Session: Unauthenticated Guest. (Log in as Admin to manage users).";
                 controlPanel.classList.add('hidden');
             }
         }
@@ -1028,18 +1079,18 @@
             }
         }
 
-        function deleteUser(username) {
+        function deleteUserAccount(targetUsername) {
             if (!currentUser || (currentUser.role !== "Admin" && currentUser.role !== "Super Admin")) return;
 
-            if (username.toLowerCase() === "gob") {
+            if (targetUsername.toLowerCase() === "gob") {
                 alert("* PERMISSION ERROR: Super Admin 'Gob' cannot be removed.");
                 return;
             }
 
-            if (confirm(`* Are you sure you want to delete user '${username}'?`)) {
-                users = users.filter(u => u.username !== username);
+            if (confirm(`* Are you sure you want to delete user '${targetUsername}'?`)) {
+                users = users.filter(u => u.username !== targetUsername);
                 saveState();
-                alert(`* User '${username}' removed successfully.`);
+                alert(`* Account '${targetUsername}' removed from database.`);
                 renderUsers();
             }
         }
@@ -1062,7 +1113,6 @@
 
             if (matched) {
                 currentUser = matched;
-                document.getElementById('authBtn').innerText = `LOGOUT (${currentUser.username.toUpperCase()})`;
                 alert(`* Access Granted. Welcome back, ${currentUser.username}.`);
                 closeAuthModal();
                 updateTabLocks();
