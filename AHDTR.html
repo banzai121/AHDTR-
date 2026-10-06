@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automated Helpdesk Ticket Router</title>
+    <title>Determination Helpdesk Ticket Router</title>
     <!-- Determination / Retro Monospace Typography -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <style>
@@ -130,7 +130,7 @@
         }
 
         .chat-window {
-            height: 360px;
+            height: 380px;
             overflow-y: auto;
             border: 2px solid #fff;
             padding: 12px;
@@ -305,6 +305,13 @@
             gap: 8px;
             margin-top: 10px;
         }
+
+        .api-config-box {
+            border: 2px dashed #fff;
+            padding: 10px;
+            margin-bottom: 12px;
+            background-color: #000;
+        }
     </style>
 </head>
 <body>
@@ -336,15 +343,18 @@
     <!-- Main Content Area -->
     <div class="main-container">
 
-        <!-- TAB 1: AI IT SPECIALIST CHATBOT -->
+        <!-- TAB 1: LIVE GEMINI LLM AI IT SPECIALIST -->
         <div id="triage-tab" class="tab-content ut-box">
             <h2>AI IT Specialist Support Portal</h2>
-            <p style="margin-bottom: 12px; font-size: 18px; color: #ccc;">
-                Chat freely with your dedicated AI IT Specialist. Describe your system, error symptoms, and what you've tried so far.
-            </p>
+            
+            <div class="api-config-box">
+                <label for="geminiApiKey">Gemini API Key (Live LLM Access):</label>
+                <input type="password" id="geminiApiKey" placeholder="Paste your Gemini API key here..." style="margin-bottom: 4px;" onchange="saveApiKey()">
+                <div style="font-size: 14px; color: #aaa;">* Key is stored locally in your browser memory. Leave blank to run local fallback model.</div>
+            </div>
 
             <div class="chat-window" id="chatWindow">
-                <div class="chat-msg bot">* [AI IT Specialist]: Greetings! I am your automated IT Support Specialist. Describe your hardware, software, or network issue and let me know your specific device context so we can troubleshoot it step-by-step!</div>
+                <div class="chat-msg bot">* [AI IT Specialist]: Greetings! I am your automated AI IT Specialist. Describe your hardware, software, or network issue and let me know your specific device context so we can troubleshoot it step-by-step!</div>
             </div>
 
             <form id="chatForm" onsubmit="handleChatSubmit(event)">
@@ -352,7 +362,7 @@
                 <input type="text" id="chatInput" placeholder="e.g. My Dell Chromebook flashes green and goes black on boot." required>
 
                 <div style="display: flex; gap: 10px; margin-top: 6px;">
-                    <button type="submit" style="flex: 1;">Send to AI Specialist</button>
+                    <button type="submit" style="flex: 1;" id="sendBtn">Send to AI Specialist</button>
                     <button type="button" onclick="openDirectTicketModal()" style="background-color: #222;">Submit Formal Ticket</button>
                 </div>
             </form>
@@ -530,6 +540,20 @@
     <audio id="customAudioElement" loop></audio>
 
     <script>
+        // --- SYSTEM PROMPT MARKDOWN FOR LIVE GEMINI LLM ---
+        const SYSTEM_PROMPT = `
+# Persona: AI IT Specialist
+You are an expert, friendly, and precise AI IT Support Specialist at an IT Helpdesk.
+Your goal is to troubleshoot hardware, software, network, and account access issues step-by-step with the user.
+
+## CRITICAL RULES:
+1. **DEVICE CONTEXT AWARENESS:** Always identify or verify the user's specific operating system (e.g. ChromeOS/Chromebook, Windows, macOS, iOS, Android) BEFORE recommending OS-specific key shortcuts or steps. NEVER offer Windows shortcuts (like Win+Ctrl+Shift+B) to Chromebook or Mac users.
+2. **STEP-BY-STEP DIAGNOSTICS:** Provide 2-3 clear, actionable troubleshooting steps tailored specifically to their verified device.
+3. **CONVERSATIONAL MEMORY:** Maintain tone and context across multiple dialogue turns. Acknowledge what the user says worked or failed.
+4. **NO SELF-IDENTIFICATION AS GEMINI:** Refer to yourself strictly as the "AI IT Specialist".
+5. **ESCALATION OPTION:** If the issue cannot be resolved, politely advise the user to click the "Submit Formal Ticket" button to route the ticket to human IT queues.
+`;
+
         // --- LOCAL STORAGE PERSISTENCE ---
         let users = JSON.parse(localStorage.getItem('ut_users')) || [
             { username: "Gob", password: "banzaiwashere", role: "Super Admin" }
@@ -547,6 +571,18 @@
         function saveState() {
             localStorage.setItem('ut_users', JSON.stringify(users));
             localStorage.setItem('ut_tickets', JSON.stringify(tickets));
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('geminiApiKey').value.trim();
+            localStorage.setItem('ut_gemini_api_key', key);
+        }
+
+        function loadApiKey() {
+            const savedKey = localStorage.getItem('ut_gemini_api_key');
+            if (savedKey) {
+                document.getElementById('geminiApiKey').value = savedKey;
+            }
         }
 
         // Boot BGM Restoration from Local Storage
@@ -648,7 +684,7 @@
                         document.getElementById("bgmToggleBtn").innerText = "BGM: CUSTOM MP3 (ON)";
                         alert("* BGM updated and saved persistently to website memory!");
                     } catch(err) {
-                        alert("* Note: Audio loaded for this session. (File size exceeds standard browser localStorage quota for permanent caching).");
+                        alert("* Audio loaded for current session.");
                         customAudio.src = base64Audio;
                         customAudio.play();
                         bgmPlaying = true;
@@ -682,7 +718,6 @@
             const sBtn = document.getElementById('tab-btn-search');
             const gobBtn = document.getElementById('gobAudioBtn');
 
-            // Restrict MP3 upload button exclusively to Gob
             if (isGob) {
                 gobBtn.classList.remove('hidden');
             } else {
@@ -744,16 +779,17 @@
             if (tabId === 'search-tab') document.getElementById('tab-btn-search').classList.add('active');
         }
 
-        // --- UNCONSTRAINED AI IT SPECIALIST ENGINE ---
-        function handleChatSubmit(e) {
+        // --- LIVE GEMINI API CHAT AGENT ---
+        async function handleChatSubmit(e) {
             e.preventDefault();
             const inputEl = document.getElementById('chatInput');
             const query = inputEl.value.trim();
             if (!query) return;
 
             const chatWindow = document.getElementById('chatWindow');
+            const sendBtn = document.getElementById('sendBtn');
 
-            // Append User Message
+            // Render User Message
             const userMsg = document.createElement('div');
             userMsg.className = 'chat-msg user';
             userMsg.innerText = query;
@@ -762,57 +798,79 @@
             inputEl.value = "";
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
-            chatHistory.push({ role: "user", text: query });
+            chatHistory.push({ role: "user", parts: [{ text: query }] });
 
-            // Context-Aware Response Generation
-            setTimeout(() => {
-                const botMsg = document.createElement('div');
-                botMsg.className = 'chat-msg bot';
-                
-                let reply = generateAISpecialistResponse(query, chatHistory);
-                botMsg.innerText = reply;
-                chatWindow.appendChild(botMsg);
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-                
-                chatHistory.push({ role: "model", text: reply });
-                playTextBlip();
-            }, 250);
+            // Create Pending Bot Message Box
+            const botMsg = document.createElement('div');
+            botMsg.className = 'chat-msg bot';
+            botMsg.innerText = "* [AI IT Specialist thinking...]";
+            chatWindow.appendChild(botMsg);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            sendBtn.disabled = true;
+
+            const apiKey = document.getElementById('geminiApiKey').value.trim();
+
+            if (apiKey) {
+                // LIVE API CALL TO GEMINI
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                            contents: chatHistory
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.candidates && data.candidates.content.parts.text) {
+                        const replyText = data.candidates.content.parts.text;
+                        botMsg.innerText = "* [AI IT Specialist]: " + replyText;
+                        chatHistory.push({ role: "model", parts: [{ text: replyText }] });
+                    } else {
+                        botMsg.innerText = "* [AI IT Specialist]: API Response error. Please check your Gemini API key.";
+                    }
+                } catch (err) {
+                    botMsg.innerText = "* [AI IT Specialist Error]: Unable to reach Gemini API. Check network or key.";
+                }
+            } else {
+                // LOCAL CONTEXT-AWARE FALLBACK MODEL
+                setTimeout(() => {
+                    const replyText = localFallbackLLM(query, chatHistory);
+                    botMsg.innerText = replyText;
+                    chatHistory.push({ role: "model", parts: [{ text: replyText }] });
+                    playTextBlip();
+                }, 300);
+            }
+
+            sendBtn.disabled = false;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            playTextBlip();
         }
 
-        function generateAISpecialistResponse(currentQuery, history) {
-            const lowerQuery = currentQuery.toLowerCase();
-            const fullContext = history.map(h => h.text.toLowerCase()).join(" ");
-
-            let isChromebook = fullContext.includes("chromebook") || lowerQuery.includes("chrome") || lowerQuery.includes("cros");
-            let isIPhone = fullContext.includes("iphone") || lowerQuery.includes("ios") || lowerQuery.includes("apple");
-            let isWindows = fullContext.includes("windows") || lowerQuery.includes("pc") || lowerQuery.includes("dell xps");
+        function localFallbackLLM(query, history) {
+            const lowerQuery = query.toLowerCase();
+            const fullText = history.map(h => h.parts.text.toLowerCase()).join(" ");
 
             let text = "* [AI IT Specialist]: ";
 
-            if (isChromebook) {
-                if (lowerQuery.includes("green") || lowerQuery.includes("flash") || lowerQuery.includes("black") || lowerQuery.includes("turn on")) {
-                    text += "I see you're experiencing display failure on a Dell Chromebook where the indicator flashes green and goes black. This symptom typically indicates a power delivery loop or ChromeOS boot state lock.\n\n";
-                    text += "Please execute these ChromeOS-specific hardware recovery steps:\n";
-                    text += "1. Chrome Hard Reset: Press and hold the Refresh key (↻) + tap the Power button. Hold Refresh until the Chrome logo appears.\n";
-                    text += "2. EC Power Drain: Unplug the AC charger, hold down the Power button for 15 seconds, reconnect the power adapter, and check if the charging LED illuminates solid amber or white.\n";
-                    text += "3. Display Brightness Test: Tap the Increase Brightness key (🔆) on the top keyboard row to ensure the backlight is not set to 0%.\n\n";
-                    text += "Does holding Refresh + Power bring up the Chrome boot screen?";
+            if (fullText.includes("chromebook") || lowerQuery.includes("chrome") || lowerQuery.includes("cros")) {
+                if (lowerQuery.includes("green") || lowerQuery.includes("flash") || lowerQuery.includes("black")) {
+                    text += "Dell Chromebook display failure loop detected.\n\nSince you are on ChromeOS, do NOT use Windows shortcuts. Try these ChromeOS hardware resets:\n";
+                    text += "1. Refresh Reset: Hold Refresh (↻) + tap Power.\n";
+                    text += "2. EC Power Drain: Unplug charger, hold Power for 15s, re-plug AC power.\n";
+                    text += "3. Tap Brightness Up (🔆) on the top function row.\n\nDid holding Refresh + Power display the Chrome boot logo?";
                 } else {
-                    text += "ChromeOS environment detected. Try testing Guest Mode, signing out of your Google account, or performing a hard refresh (Refresh + Power). Let me know what you observe!";
+                    text += "ChromeOS context confirmed. Try Guest Mode, logging out, or resetting hardware (Refresh + Power).";
                 }
-            } else if (isIPhone) {
-                text += "iOS environment active. For iPhone network, battery, or boot anomalies:\n\n";
-                text += "1. Forced Reboot: Quick-press Volume Up, quick-press Volume Down, then hold the Side Power button until the Apple logo appears.\n";
-                text += "2. Reset Network Settings: Settings > General > Transfer or Reset iPhone > Reset > Reset Network Settings.\n\n";
-                text += "Did the forced reboot show the Apple logo?";
-            } else if (isWindows) {
-                text += "Windows environment detected. Here are targeted troubleshooting steps:\n\n";
-                text += "1. Graphics Driver Reset: Press Win + Ctrl + Shift + B to restart the display driver stack.\n";
-                text += "2. Safe Mode Recovery: Hold Shift while clicking Restart to enter Windows Recovery Environment.\n\n";
-                text += "Did the screen beep or flash when pressing Win + Ctrl + Shift + B?";
+            } else if (fullText.includes("iphone") || lowerQuery.includes("ios") || lowerQuery.includes("apple")) {
+                text += "iOS context recognized. Force restart: Vol Up, Vol Down, then hold Side Power button until Apple logo appears.";
+            } else if (fullText.includes("windows") || lowerQuery.includes("pc")) {
+                text += "Windows PC context recognized. Driver Reset: Press Win + Ctrl + Shift + B.";
             } else {
-                text += "I'm here to help fix your issue! To ensure I provide the exact steps for your workstation or mobile device, what brand or operating system are you using (e.g., Chromebook, Windows PC, Mac, iPhone)?\n\n";
-                text += "In the meantime, running a 15-second power drain and testing a secondary wall outlet is always recommended!";
+                text += "Welcome! To give you accurate diagnostic steps, what specific brand and operating system are you using (e.g. Chromebook, Windows PC, Mac, iPhone)?";
             }
 
             return text;
@@ -1205,6 +1263,7 @@
 
         // Boot Initialization
         saveState();
+        loadApiKey();
         initBGMFromStorage();
         updateTabLocks();
     </script>
