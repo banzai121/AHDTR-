@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AUTOMATED HELPDESK PORTAL</title>
+    <title/>AUTOMATED HELPDESK PORTAL</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -949,7 +949,7 @@
             return "";
         }
 
-        // STRICT LLM CHAT HANDLER USING NATIVE COMPLETION (CHATML FORMATTED)
+        // STRICT LLM CHAT HANDLER USING FLATTENED COMPLETION OPTIONS
         window.handleChatSubmit = async function(e) {
             e.preventDefault();
             const inputEl = document.getElementById('chatInput');
@@ -992,14 +992,12 @@
                 
                 const formattedPrompt = `<|im_start|>system\n${systemInstructions}<|im_end|>\n<|im_start|>user\n${query}<|im_end|>\n<|im_start|>assistant\n`;
 
-                // 3. Perform Inference via Native createCompletion
+                // 3. Perform Inference via Native createCompletion with Flattened Options
                 await wllamaInstance.createCompletion(formattedPrompt, {
                     nPredict: 600,
-                    sampling: {
-                        temp: 0.5,
-                        top_p: 0.9,
-                        penalty_repeat: 1.2
-                    },
+                    temp: 0.5,
+                    top_p: 0.9,
+                    penalty_repeat: 1.2,
                     onNewToken: (token, piece, currentText) => {
                         botMsg.innerText = "* [AI Support Specialist]:\n" + currentText;
                         chatWindow.scrollTop = chatWindow.scrollHeight;
