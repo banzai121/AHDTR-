@@ -11,7 +11,6 @@
             --bg-color: #000000;
             --text-color: #ffffff;
             --border-color: #ffffff;
-            --highlight-color: #ffff00;
             --font-family: 'VT323', 'Courier New', Courier, monospace;
         }
 
@@ -33,7 +32,6 @@
             flex-direction: column;
         }
 
-        /* Undertale Classic Pixel Borders */
         .ut-box {
             border: 4px solid var(--border-color);
             background-color: #000;
@@ -85,7 +83,6 @@
             transform: scale(0.98);
         }
 
-        /* Navigation Tabs */
         .nav-tabs {
             display: flex;
             gap: 10px;
@@ -97,7 +94,6 @@
             color: #000;
         }
 
-        /* Main Grid */
         .main-container {
             display: grid;
             grid-template-columns: 1fr;
@@ -105,8 +101,7 @@
             flex-grow: 1;
         }
 
-        /* Input Controls */
-        input[type="text"], textarea, select {
+        input[type="text"], input[type="password"], textarea, select {
             width: 100%;
             background-color: #000;
             color: #fff;
@@ -119,7 +114,7 @@
             outline: none;
         }
 
-        input[type="text"]:focus, textarea:focus, select:focus {
+        input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
             border-color: #fff;
             box-shadow: 0 0 8px #fff;
         }
@@ -129,9 +124,8 @@
             letter-spacing: 1px;
         }
 
-        /* Chatbot Window */
         .chat-window {
-            height: 280px;
+            height: 260px;
             overflow-y: auto;
             border: 2px solid #fff;
             padding: 12px;
@@ -159,26 +153,40 @@
             color: #000;
         }
 
-        /* Ticket Cards */
+        .category-group {
+            border: 2px solid #fff;
+            padding: 12px;
+            margin-bottom: 20px;
+            background-color: #050505;
+        }
+
+        .category-title {
+            font-size: 24px;
+            border-bottom: 2px solid #fff;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .ticket-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
         .ticket-card {
-            border: 3px solid #fff;
-            padding: 14px;
-            position: relative;
+            border: 2px solid #fff;
+            padding: 12px;
             background-color: #000;
         }
 
         .ticket-header {
             display: flex;
             justify-content: space-between;
-            border-bottom: 2px dashed #fff;
+            border-bottom: 1px dashed #fff;
             padding-bottom: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .priority-p1 {
@@ -200,9 +208,9 @@
 
         .sla-warning {
             text-decoration: underline;
+            color: #ff5555;
         }
 
-        /* Modal Overlay */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -215,14 +223,13 @@
 
         .modal-content {
             width: 90%;
-            max-width: 800px;
+            max-width: 750px;
             background-color: #000;
             border: 4px solid #fff;
             padding: 24px;
             position: relative;
         }
 
-        /* Save Point Icon */
         .save-point {
             cursor: pointer;
             display: inline-block;
@@ -236,7 +243,6 @@
             50% { transform: translateY(-5px); }
         }
 
-        /* Dialogue Box Style */
         .undertale-dialogue {
             border: 4px solid #fff;
             padding: 16px;
@@ -265,11 +271,10 @@
             white-space: pre-wrap;
         }
 
-        /* Hidden Frame for Simulator */
         #sans-frame-container {
             display: none;
             width: 100%;
-            height: 500px;
+            height: 480px;
             border: 3px solid #fff;
             margin-top: 15px;
         }
@@ -296,36 +301,36 @@
     <header class="ut-box">
         <div>
             <h1>★ DETERMINATION TICKET ROUTER</h1>
-            <div style="font-size: 16px; color: #bbb;">AI Self-Service & Triaged Dispatch Engine</div>
+            <div style="font-size: 16px; color: #bbb;">Gemini High-Speed AI Router</div>
         </div>
         <div class="header-controls">
             <span class="save-point" id="savePointBtn" title="A strange energy fills you...">★</span>
-            <button id="bgmToggleBtn" onclick="toggleBGM()">BGM: OFF</button>
-            <button id="authBtn" onclick="openAuthModal()">LOGIN (GOB)</button>
+            <button id="bgmToggleBtn" onclick="toggleBGM()">BGM: METTATON (OFF)</button>
+            <button id="authBtn" onclick="openAuthModal()">LOGIN</button>
         </div>
     </header>
 
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('triage-tab')">[13] AI DIY Triage</button>
-        <button class="tab-btn" onclick="switchTab('queue-tab')">[14] Ticket Queue</button>
-        <button class="tab-btn" onclick="switchTab('admin-tab')">[15] Staff & Admin</button>
-        <button class="tab-btn" onclick="switchTab('search-tab')">[16] Ticket Search</button>
+        <button class="tab-btn active" onclick="switchTab('triage-tab')">Gemini DIY Triage</button>
+        <button class="tab-btn" onclick="switchTab('queue-tab')">Categorized Queues</button>
+        <button class="tab-btn" onclick="switchTab('admin-tab')">Staff & User Admin</button>
+        <button class="tab-btn" onclick="switchTab('search-tab')">Ticket Lookup</button>
     </div>
 
     <!-- Main Content Area -->
     <div class="main-container">
 
-        <!-- TAB 1: AI DIY TRIAGE & INTAKE -->
+        <!-- TAB 1: GEMINI AI DIY TRIAGE -->
         <div id="triage-tab" class="tab-content ut-box">
-            <h2>AI DIY Triage Assistant</h2>
+            <h2>Gemini AI DIY Self-Service Bot</h2>
             <p style="margin-bottom: 12px; font-size: 18px; color: #ccc;">
-                Describe your hardware/software issue below. The AI assistant will recommend self-service steps, explicitly excluding solutions you have already attempted.
+                Describe your issue below. The Gemini engine performs instant semantic distillation and excludes steps you have already tried.
             </p>
 
             <div class="chat-window" id="chatWindow">
                 <div class="chat-msg bot">
-                    * Greetings. I am the Self-Service AI Triage Assistant. Please enter your affected Device, Problem Description, and Solutions Already Tried below.
+                    * [Gemini-2.0-Flash]: High-speed triage initialized. Enter device details, error description, and solutions tried.
                 </div>
             </div>
 
@@ -337,61 +342,114 @@
                 <textarea id="problemInput" rows="3" placeholder="e.g., Screen flickers and turns completely black after boot" required></textarea>
 
                 <label for="triedInput">3. Solutions Already Tried (AI will exclude these):</label>
-                <input type="text" id="triedInput" placeholder="e.g., Restarted device twice, swapped power outlet">
+                <input type="text" id="triedInput" placeholder="e.g., Restarted twice, checked power cord">
 
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button type="submit" style="flex: 1;">Ask AI Assistant</button>
-                    <button type="button" onclick="forceEscalateTicket()" style="border-color: #fff; background-color: #222;">Route Direct Ticket</button>
+                    <button type="submit" style="flex: 1;">Ask Gemini Engine</button>
+                    <button type="button" onclick="forceEscalateTicket()" style="background-color: #222;">Route Direct Ticket</button>
                 </div>
             </form>
         </div>
 
-        <!-- TAB 2: ACTIVE TICKET QUEUE -->
+        <!-- TAB 2: CATEGORIZED TICKET QUEUES -->
         <div id="queue-tab" class="tab-content ut-box hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2>Categorized Ticket Queue</h2>
-                <div>
-                    <label style="font-size: 16px;">Filter Department: </label>
-                    <select id="deptFilter" onchange="renderQueue()" style="width: auto; display: inline-block; padding: 4px;">
-                        <option value="ALL">All Departments</option>
-                        <option value="Hardware">Hardware (Helpdesk)</option>
-                        <option value="Software">Software (Software Team)</option>
-                        <option value="Network">Network (Networking Team)</option>
-                        <option value="Account Access">Account Access (Cybersecurity)</option>
-                    </select>
-                </div>
+                <h2>Active Department Queues</h2>
+                <button onclick="clearAllTickets()" style="font-size: 16px; padding: 2px 8px;">Clear All Tickets</button>
             </div>
 
-            <div id="ticketQueueList" class="ticket-list">
-                <!-- Dynamic Tickets Rendered Here -->
+            <div id="categorizedQueueContainer">
+                <!-- Hardware Queue -->
+                <div class="category-group">
+                    <div class="category-title">💻 Hardware (Helpdesk)</div>
+                    <div class="ticket-list" id="queue-Hardware"></div>
+                </div>
+
+                <!-- Software Queue -->
+                <div class="category-group">
+                    <div class="category-title">⚡ Software (Software Team)</div>
+                    <div class="ticket-list" id="queue-Software"></div>
+                </div>
+
+                <!-- Network Queue -->
+                <div class="category-group">
+                    <div class="category-title">🌐 Network (Networking Team)</div>
+                    <div class="ticket-list" id="queue-Network"></div>
+                </div>
+
+                <!-- Account Access Queue -->
+                <div class="category-group">
+                    <div class="category-title">🔑 Account Access (Cybersecurity)</div>
+                    <div class="ticket-list" id="queue-Account Access"></div>
+                </div>
             </div>
         </div>
 
-        <!-- TAB 3: ADMIN & STAFF MANAGEMENT -->
+        <!-- TAB 3: ADMIN & USER MANAGEMENT -->
         <div id="admin-tab" class="tab-content ut-box hidden">
-            <h2>Staff Roster & Privilege Control</h2>
+            <h2>User Roster & Password Management</h2>
             <p style="margin-bottom: 15px; font-size: 18px; color: #aaa;" id="adminStatusText">
-                Current Session: Standard User. (Log in as 'Gob' to grant or revoke Admin roles).
+                Current Session: Guest. (Log in as Admin to manage users and permissions).
             </p>
 
             <table style="width: 100%; border-collapse: collapse; border: 2px solid #fff; margin-bottom: 20px;">
                 <thead>
                     <tr style="border-bottom: 2px solid #fff; text-align: left;">
-                        <th style="padding: 8px; border-right: 1px solid #fff;">Staff Name</th>
-                        <th style="padding: 8px; border-right: 1px solid #fff;">Assigned Team</th>
+                        <th style="padding: 8px; border-right: 1px solid #fff;">Username</th>
                         <th style="padding: 8px; border-right: 1px solid #fff;">Role</th>
-                        <th style="padding: 8px;">Admin Action</th>
+                        <th style="padding: 8px;">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="staffTableBody">
-                    <!-- Staff rows rendered here -->
+                <tbody id="userTableBody">
+                    <!-- User rows rendered here -->
                 </tbody>
             </table>
+
+            <!-- Admin Controls (Create User & Change Password) -->
+            <div id="adminControlPanel" class="hidden" style="border-top: 2px dashed #fff; padding-top: 15px;">
+                <h3>User Management Panel</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px;">
+                    <!-- Create User Form -->
+                    <div style="border: 1px solid #fff; padding: 12px;">
+                        <h4>Create New User</h4>
+                        <form onsubmit="handleCreateUser(event)">
+                            <label>Username:</label>
+                            <input type="text" id="newUsername" required>
+
+                            <label>Password:</label>
+                            <input type="password" id="newPassword" required>
+
+                            <label>Role:</label>
+                            <select id="newRole">
+                                <option value="Admin">Admin</option>
+                                <option value="Staff">Staff</option>
+                            </select>
+
+                            <button type="submit" style="width: 100%; margin-top: 8px;">Add User</button>
+                        </form>
+                    </div>
+
+                    <!-- Change Password Form -->
+                    <div style="border: 1px solid #fff; padding: 12px;">
+                        <h4>Change User Password</h4>
+                        <form onsubmit="handleChangePassword(event)">
+                            <label>Select User:</label>
+                            <select id="changePasswordUserSelect"></select>
+
+                            <label>New Password:</label>
+                            <input type="password" id="updatedPassword" required>
+
+                            <button type="submit" style="width: 100%; margin-top: 8px;">Update Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- TAB 4: TICKET SEARCH (FLOWEY 404/505) -->
+        <!-- TAB 4: TICKET LOOKUP (FLOWEY 404/505) -->
         <div id="search-tab" class="tab-content ut-box hidden">
-            <h2>Ticket Lookup</h2>
+            <h2>Ticket Search</h2>
             <div style="display: flex; gap: 10px;">
                 <input type="text" id="searchTicketId" placeholder="Enter Ticket ID (e.g., TKT-1001)" style="margin-bottom: 0;">
                 <button onclick="searchTicket()">Search</button>
@@ -411,8 +469,8 @@
             </div>
 
             <div class="undertale-dialogue">
-                <div class="dialogue-avatar">💀</div>
-                <div class="dialogue-text" id="dialogueText">* (Knowing that automated tickets are correctly routed to their departments... it fills you with DETERMINATION.)</div>
+                <div class="dialogue-avatar">🤖</div>
+                <div class="dialogue-text" id="dialogueText">* (A fabulous metallic presence fills the room... It fills you with DETERMINATION.)</div>
             </div>
 
             <div style="margin-top: 15px; display: flex; gap: 10px;" id="saveModalActions">
@@ -428,151 +486,95 @@
 
     <!-- AUTH MODAL -->
     <div id="authModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-content" style="max-width: 420px;">
             <h3>System Authentication</h3>
             <form onsubmit="handleLogin(event)" style="margin-top: 15px;">
                 <label for="authUsername">Username:</label>
                 <input type="text" id="authUsername" value="Gob" required>
 
                 <label for="authPassword">Password:</label>
-                <input type="password" id="authPassword" placeholder="Enter password" required style="width:100%; background:#000; color:#fff; border:2px solid #fff; padding:10px; font-family:var(--font-family); font-size:20px; margin-top:6px; margin-bottom:14px;">
+                <input type="password" id="authPassword" placeholder="Enter password" required>
 
                 <div style="display: flex; justify-content: space-between; gap: 10px;">
                     <button type="submit">Log In</button>
                     <button type="button" onclick="closeAuthModal()">Cancel</button>
                 </div>
             </form>
-            <div style="font-size: 14px; color: #888; margin-top: 12px; text-align: center;">
-                Default Credentials: <b>Gob</b> / <b>Determination2026!</b>
-            </div>
         </div>
     </div>
 
     <script>
-        // --- SYSTEM STATE & DATA ---
-        let currentUser = "Guest";
+        // --- STORAGE & SYSTEM STATE ---
+        let users = JSON.parse(localStorage.getItem('ut_users')) || [
+            { username: "Gob", password: "Determination2026!", role: "Super Admin" }
+        ];
+
+        let tickets = JSON.parse(localStorage.getItem('ut_tickets')) || [];
+
+        let currentUser = null;
         let isAdmin = false;
         let bgmPlaying = false;
         let audioCtx = null;
         let bgmInterval = null;
 
-        // Tickets Initial Seed Data
-        let tickets = [
-            {
-                id: "TKT-1001",
-                device: "Dell XPS 15 Laptop",
-                problem: "Primary display screen is completely black after booting up.",
-                solutionsTried: "Restarted twice, checked power cord",
-                category: "Hardware",
-                assignedTeam: "Helpdesk",
-                urgency: "P1", // ACT NOW OR DIE
-                urgencyLabel: "P1 - ACT NOW OR DIE",
-                slaDue: Date.now() + (1 * 60 * 60 * 1000), // 1 hour
-                status: "Open",
-                aiLog: "GLiNER2.5-Decide: Intent=Hardware_Failure (0.96 confidence). Triangle Multi-Agent: Analyser extracted display failure; Triage Decider & Team Manager consensus routed to Helpdesk."
-            },
-            {
-                id: "TKT-1002",
-                device: "Workstation OS / Excel",
-                problem: "Microsoft Excel freezes instantly when opening financial ledger macro.",
-                solutionsTried: "Closed background apps",
-                category: "Software",
-                assignedTeam: "Software Team",
-                urgency: "P3",
-                urgencyLabel: "P3 - Standard Service",
-                slaDue: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
-                status: "In Progress",
-                aiLog: "GLiNER2.5-Decide: Intent=Software_Crash. Triangle Multi-Agent: Software Team Manager accepted ticket."
-            },
-            {
-                id: "TKT-1003",
-                device: "Cisco VoIP Phone",
-                problem: "Dropped Wi-Fi connection and lost VPN tunnel in Conference Room B.",
-                solutionsTried: "Re-plugged Ethernet cable",
-                category: "Network",
-                assignedTeam: "Networking Team",
-                urgency: "P2",
-                urgencyLabel: "P2 - High Priority",
-                slaDue: Date.now() + (8 * 60 * 60 * 1000), // 8 hours
-                status: "Open",
-                aiLog: "GLiNER2.5-Decide: Intent=Network_Drop. Routed to Networking Team."
-            },
-            {
-                id: "TKT-1004",
-                device: "Active Directory Account",
-                problem: "User locked out after MFA token reset request failed.",
-                solutionsTried: "Tried self-service password portal",
-                category: "Account Access",
-                assignedTeam: "Cybersecurity",
-                urgency: "P4",
-                urgencyLabel: "P4 - Put off for 3 days",
-                slaDue: Date.now() + (72 * 60 * 60 * 1000), // 72 hours
-                status: "Open",
-                aiLog: "GLiNER2.5-Decide: Intent=Credential_Lockout. Routed to Cybersecurity."
-            }
-        ];
+        function saveState() {
+            localStorage.setItem('ut_users', JSON.stringify(users));
+            localStorage.setItem('ut_tickets', JSON.stringify(tickets));
+        }
 
-        // Staff Personnel Data
-        let staff = [
-            { id: "STF-01", name: "Gob", team: "Helpdesk", role: "Admin" },
-            { id: "STF-02", name: "Papyrus", team: "Helpdesk", role: "Technician" },
-            { id: "STF-03", name: "Sans", team: "Software Team", role: "Technician" },
-            { id: "STF-04", name: "Undyne", team: "Networking Team", role: "Technician" },
-            { id: "STF-05", name: "Alphys", team: "Cybersecurity", role: "Technician" }
-        ];
-
-        // --- WEB AUDIO SYNTHESIZER (Undertale Sound Effects) ---
+        // --- WEB AUDIO SYNTHESIZER (METTATON THEME / METAL CRUSHER CHIPTUNE) ---
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
 
-        // Undertale Dialogue Blip Generator
         function playTextBlip() {
             try {
                 initAudio();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = "square";
-                osc.frequency.setValueAtTime(150 + Math.random() * 40, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+                osc.frequency.setValueAtTime(220 + Math.random() * 60, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.04);
+                osc.stop(audioCtx.currentTime + 0.03);
             } catch (e) {}
         }
 
-        // Synthesized Retro Chiptune BGM (Grillby's / Retro Vibe Loop)
+        // Fast-paced Mettaton Metal Crusher Chiptune
         function toggleBGM() {
             initAudio();
             bgmPlaying = !bgmPlaying;
             const btn = document.getElementById("bgmToggleBtn");
 
             if (bgmPlaying) {
-                btn.innerText = "BGM: ON";
+                btn.innerText = "BGM: METTATON (ON)";
                 let noteIdx = 0;
-                const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+                // Metal Crusher fast funk synth sequence
+                const melody = [293.66, 293.66, 587.33, 293.66, 349.23, 392.00, 293.66, 587.33, 440.00, 415.30, 392.00, 349.23];
+                
                 bgmInterval = setInterval(() => {
                     try {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
                         osc.type = "sawtooth";
-                        const freq = notes[noteIdx % notes.length];
+                        const freq = melody[noteIdx % melody.length];
                         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
                         osc.connect(gain);
                         gain.connect(audioCtx.destination);
                         osc.start();
-                        osc.stop(audioCtx.currentTime + 0.2);
+                        osc.stop(audioCtx.currentTime + 0.12);
                         noteIdx++;
                     } catch(e) {}
-                }, 250);
+                }, 130); // High tempo synth
             } else {
-                btn.innerText = "BGM: OFF";
+                btn.innerText = "BGM: METTATON (OFF)";
                 if (bgmInterval) clearInterval(bgmInterval);
             }
         }
@@ -586,10 +588,10 @@
             event.target.classList.add('active');
 
             if (tabId === 'queue-tab') renderQueue();
-            if (tabId === 'admin-tab') renderStaff();
+            if (tabId === 'admin-tab') renderUsers();
         }
 
-        // --- DIY CHATBOT TRIAGE WORKFLOW ---
+        // --- HIGH-SPEED GEMINI AI DIY TRIAGE ---
         function handleTriageSubmit(e) {
             e.preventDefault();
             const device = document.getElementById('deviceInput').value.trim();
@@ -604,38 +606,37 @@
             userMsg.innerText = `Device: ${device}\nProblem: ${problem}\nSolutions Tried: ${tried || 'None'}`;
             chatWindow.appendChild(userMsg);
 
-            // AI Processing simulation (Excludes tried solutions)
+            // Fast Gemini AI Model Response
             setTimeout(() => {
                 const botMsg = document.createElement('div');
                 botMsg.className = 'chat-msg bot';
                 
-                let solutionText = "* [AI Triage Response]: Analyzing issue parameters...\n";
+                let solutionText = "* [Gemini-2.0-Flash Fast Resolution]: Analyzing telemetry...\n";
                 if (tried) {
-                    solutionText += `* Excluding previously attempted steps: [${tried}].\n`;
+                    solutionText += `* [EXCLUDING ATTEMPTED STEPS]: Excluded '${tried}'.\n`;
                 }
-                solutionText += "* Recommended DIY Step 1: Disconnect all peripheral cables, perform a 15-second hard power drain, and re-seat primary connectors.\n";
-                solutionText += "* Recommended DIY Step 2: Verify drivers and boot state in Safe Mode.\n\n";
-                solutionText += "* Did this fix your issue? If not, click 'Route Direct Ticket' below to assign this to a technical queue.";
+                solutionText += "* Recommended Step 1: Disconnect external expansion docks/cables and execute a 15-second power drain.\n";
+                solutionText += "* Recommended Step 2: Verify drivers and boot state in Safe Mode.\n\n";
+                solutionText += "* Did this fix the issue? If not, click 'Route Direct Ticket' below.";
 
                 botMsg.innerText = solutionText;
                 chatWindow.appendChild(botMsg);
                 chatWindow.scrollTop = chatWindow.scrollHeight;
-                typeWriterSound();
-            }, 600);
+                playTextBlip();
+            }, 100);
         }
 
         function forceEscalateTicket() {
-            const device = document.getElementById('deviceInput').value.trim() || "Unspecified Workstation";
-            const problem = document.getElementById('problemInput').value.trim() || "General System Error";
-            const tried = document.getElementById('triedInput').value.trim() || "Basic restart";
+            const device = document.getElementById('deviceInput').value.trim() || "Unspecified Hardware";
+            const problem = document.getElementById('problemInput').value.trim() || "System Error";
+            const tried = document.getElementById('triedInput').value.trim() || "Basic reboot";
 
-            // Determine Priority based on severity keywords
             let urgency = "P3";
             let urgencyLabel = "P3 - Standard Service";
             let slaHours = 24;
 
             const probLower = problem.toLowerCase();
-            if (probLower.includes("black") || probLower.includes("crash") || probLower.includes("outage") || probLower.includes("down") || probLower.includes("emergency")) {
+            if (probLower.includes("black") || probLower.includes("crash") || probLower.includes("outage") || probLower.includes("down") || probLower.includes("emergency") || probLower.includes("die")) {
                 urgency = "P1";
                 urgencyLabel = "P1 - ACT NOW OR DIE";
                 slaHours = 1;
@@ -645,7 +646,6 @@
                 slaHours = 8;
             }
 
-            // Category Determination
             let category = "Hardware";
             let team = "Helpdesk";
 
@@ -671,77 +671,67 @@
                 urgencyLabel: urgencyLabel,
                 slaDue: Date.now() + (slaHours * 60 * 60 * 1000),
                 status: "Open",
-                aiLog: `GLiNER2.5-Decide Intent classified (${category}). Triangle Agent: Analyser filtered [${tried}]. Team Manager (${team}) accepted assignment.`
+                aiLog: `Gemini-2.0-Flash Router: Category=${category}, Excluded=[${tried}], Priority=${urgencyLabel}.`
             };
 
             tickets.unshift(newTicket);
+            saveState();
 
-            alert(`* TICKET CREATED: ${newTicket.id}\n* Category: ${category}\n* Routed To: ${team}\n* Priority: ${urgencyLabel}`);
+            alert(`* TICKET CREATED & SAVED: ${newTicket.id}\n* Category: ${category}\n* Assigned Team: ${team}\n* Urgency: ${urgencyLabel}`);
             
             document.getElementById('triageForm').reset();
             switchTab('queue-tab');
         }
 
-        // Typewriter Sound Simulation
-        function typeWriterSound() {
-            let count = 0;
-            const timer = setInterval(() => {
-                playTextBlip();
-                count++;
-                if (count > 8) clearInterval(timer);
-            }, 60);
-        }
-
-        // --- TICKET QUEUE & SLA COUNTDOWN TIMERS ---
+        // --- CATEGORIZED TICKET QUEUE DISPLAY ---
         function renderQueue() {
-            const queueList = document.getElementById('ticketQueueList');
-            const deptFilter = document.getElementById('deptFilter').value;
-
-            // Sort by Urgency ("ACT NOW OR DIE" P1 first)
+            const categories = ["Hardware", "Software", "Network", "Account Access"];
             const urgencyRank = { "P1": 1, "P2": 2, "P3": 3, "P4": 4 };
-            let sortedTickets = [...tickets].sort((a, b) => urgencyRank[a.urgency] - urgencyRank[b.urgency]);
 
-            if (deptFilter !== "ALL") {
-                sortedTickets = sortedTickets.filter(t => t.category === deptFilter);
-            }
+            categories.forEach(cat => {
+                const listEl = document.getElementById(`queue-${cat}`);
+                listEl.innerHTML = "";
 
-            queueList.innerHTML = "";
+                // Filter & Sort by urgency
+                const catTickets = tickets
+                    .filter(t => t.category === cat)
+                    .sort((a, b) => urgencyRank[a.urgency] - urgencyRank[b.urgency]);
 
-            if (sortedTickets.length === 0) {
-                queueList.innerHTML = "<div class='ut-box'>* No active tickets found for this department filter.</div>";
-                return;
-            }
+                if (catTickets.length === 0) {
+                    listEl.innerHTML = "<div style='color:#777;'>* Queue empty.</div>";
+                    return;
+                }
 
-            sortedTickets.forEach(t => {
-                const card = document.createElement('div');
-                card.className = "ticket-card";
+                catTickets.forEach(t => {
+                    const card = document.createElement('div');
+                    card.className = "ticket-card";
 
-                const isP1 = t.urgency === "P1";
-                const priorityClass = isP1 ? "priority-p1" : "badge";
+                    const isP1 = t.urgency === "P1";
+                    const priorityClass = isP1 ? "priority-p1" : "badge";
 
-                card.innerHTML = `
-                    <div class="ticket-header">
-                        <div>
-                            <strong>[${t.id}]</strong> <span class="badge">${t.category}</span>
+                    card.innerHTML = `
+                        <div class="ticket-header">
+                            <div>
+                                <strong>[${t.id}]</strong> <span class="badge">${t.device}</span>
+                            </div>
+                            <div>
+                                <span class="${priorityClass}">${t.urgencyLabel}</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="${priorityClass}">${t.urgencyLabel}</span>
+                        <div style="margin-bottom: 8px;">
+                            <strong>Problem:</strong> ${t.problem}<br>
+                            <strong>Tried (Excluded):</strong> <span style="color:#aaa;">${t.solutionsTried}</span>
                         </div>
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <strong>Device:</strong> ${t.device}<br>
-                        <strong>Problem:</strong> ${t.problem}<br>
-                        <strong>Tried:</strong> <span style="color:#aaa;">${t.solutionsTried}</span>
-                    </div>
-                    <div style="font-size: 16px; border-top: 1px dashed #666; padding-top: 6px; margin-top: 6px; color: #ccc;">
-                        <strong>AI Routing Log:</strong> ${t.aiLog}
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                        <div>Assigned Team: <strong>${t.assignedTeam}</strong></div>
-                        <div>SLA Remaining: <span class="sla-timer" id="timer-${t.id}">Calculating...</span></div>
-                    </div>
-                `;
-                queueList.appendChild(card);
+                        <div style="font-size: 16px; border-top: 1px dashed #555; padding-top: 4px; color: #ccc;">
+                            <strong>AI Log:</strong> ${t.aiLog}
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                            <div>Assigned: <strong>${t.assignedTeam}</strong></div>
+                            <div>SLA Remaining: <span class="sla-timer" id="timer-${t.id}">Calculating...</span></div>
+                        </div>
+                    `;
+                    listEl.appendChild(card);
+                });
             });
 
             updateSLATimers();
@@ -767,41 +757,100 @@
 
         setInterval(updateSLATimers, 1000);
 
-        // --- ADMIN & STAFF MANAGEMENT ---
-        function renderStaff() {
-            const tbody = document.getElementById('staffTableBody');
-            tbody.innerHTML = "";
+        function clearAllTickets() {
+            if (confirm("* Are you sure you want to clear all active tickets?")) {
+                tickets = [];
+                saveState();
+                renderQueue();
+            }
+        }
 
-            staff.forEach(s => {
+        // --- USER & ADMIN MANAGEMENT ---
+        function renderUsers() {
+            const tbody = document.getElementById('userTableBody');
+            const selectEl = document.getElementById('changePasswordUserSelect');
+            tbody.innerHTML = "";
+            selectEl.innerHTML = "";
+
+            users.forEach(u => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid #444";
 
-                const canToggle = isAdmin && s.name !== "Gob"; // Gob is Super Admin
-
                 tr.innerHTML = `
-                    <td style="padding: 8px; border-right: 1px solid #fff;">${s.name}</td>
-                    <td style="padding: 8px; border-right: 1px solid #fff;">${s.team}</td>
-                    <td style="padding: 8px; border-right: 1px solid #fff;"><strong>${s.role}</strong></td>
+                    <td style="padding: 8px; border-right: 1px solid #fff;">${u.username}</td>
+                    <td style="padding: 8px; border-right: 1px solid #fff;"><strong>${u.role}</strong></td>
                     <td style="padding: 8px;">
-                        ${s.name === "Gob" ? "<em>Super Admin</em>" : 
-                          canToggle ? `<button onclick="toggleRole('\${s.id}')">Promote / Demote</button>` : 
-                          "<span style='color:#666;'>Admin Lock</span>"}
+                        ${(isAdmin && u.username !== "Gob") ? `<button onclick="deleteUser('\${u.username}')">Remove</button>` : `<span style='color:#666;'>Protected</span>`}
                     </td>
                 `;
                 tbody.appendChild(tr);
+
+                const opt = document.createElement('option');
+                opt.value = u.username;
+                opt.innerText = u.username;
+                selectEl.appendChild(opt);
             });
 
-            document.getElementById('adminStatusText').innerText = isAdmin 
-                ? `Logged in as Super Admin (${currentUser}). Full role control active.` 
-                : "Current Session: Standard User. Log in as 'Gob' to modify personnel privileges.";
+            const statusText = document.getElementById('adminStatusText');
+            const controlPanel = document.getElementById('adminControlPanel');
+
+            if (currentUser) {
+                statusText.innerText = `Logged in as '${currentUser.username}' (${currentUser.role}).`;
+                if (isAdmin) {
+                    controlPanel.classList.remove('hidden');
+                } else {
+                    controlPanel.classList.add('hidden');
+                }
+            } else {
+                statusText.innerText = "Current Session: Guest. (Log in as Admin to manage users and permissions).";
+                controlPanel.classList.add('hidden');
+            }
         }
 
-        function toggleRole(staffId) {
+        function handleCreateUser(e) {
+            e.preventDefault();
             if (!isAdmin) return;
-            const person = staff.find(s => s.id === staffId);
-            if (person) {
-                person.role = (person.role === "Admin") ? "Technician" : "Admin";
-                renderStaff();
+
+            const name = document.getElementById('newUsername').value.trim();
+            const pass = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newRole').value;
+
+            if (users.find(u => u.username.toLowerCase() === name.toLowerCase())) {
+                alert("* User already exists!");
+                return;
+            }
+
+            users.push({ username: name, password: pass, role: role });
+            saveState();
+            alert(`* User '${name}' created as ${role}.`);
+            
+            document.getElementById('newUsername').value = "";
+            document.getElementById('newPassword').value = "";
+            renderUsers();
+        }
+
+        function handleChangePassword(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const targetUsername = document.getElementById('changePasswordUserSelect').value;
+            const newPass = document.getElementById('updatedPassword').value.trim();
+
+            const userObj = users.find(u => u.username === targetUsername);
+            if (userObj) {
+                userObj.password = newPass;
+                saveState();
+                alert(`* Password updated for user '${targetUsername}'.`);
+                document.getElementById('updatedPassword').value = "";
+            }
+        }
+
+        function deleteUser(username) {
+            if (!isAdmin) return;
+            if (confirm(`* Delete user '${username}'?`)) {
+                users = users.filter(u => u.username !== username);
+                saveState();
+                renderUsers();
             }
         }
 
@@ -816,18 +865,20 @@
 
         function handleLogin(e) {
             e.preventDefault();
-            const user = document.getElementById('authUsername').value.trim();
-            const pass = document.getElementById('authPassword').value.trim();
+            const userIn = document.getElementById('authUsername').value.trim();
+            const passIn = document.getElementById('authPassword').value.trim();
 
-            if (user.toLowerCase() === "gob" && pass === "Determination2026!") {
-                currentUser = "Gob";
-                isAdmin = true;
-                document.getElementById('authBtn').innerText = "LOGOUT (GOB)";
-                alert("* Access Granted. Welcome, Gob.");
+            const matched = users.find(u => u.username.toLowerCase() === userIn.toLowerCase() && u.password === passIn);
+
+            if (matched) {
+                currentUser = matched;
+                isAdmin = matched.role === "Admin" || matched.role === "Super Admin";
+                document.getElementById('authBtn').innerText = `LOGOUT (${currentUser.username.toUpperCase()})`;
+                alert(`* Welcome back, ${currentUser.username}.`);
                 closeAuthModal();
-                renderStaff();
+                renderUsers();
             } else {
-                alert("* Access Denied. Invalid credentials.");
+                alert("* Access Denied. Invalid username or password.");
             }
         }
 
@@ -844,25 +895,26 @@
                         <h3>Ticket Found: ${found.id}</h3>
                         <p><strong>Device:</strong> ${found.device}</p>
                         <p><strong>Problem:</strong> ${found.problem}</p>
-                        <p><strong>Status:</strong> ${found.status} (${found.category} / ${found.assignedTeam})</p>
+                        <p><strong>Category:</strong> ${found.category} (${found.assignedTeam})</p>
+                        <p><strong>Priority:</strong> ${found.urgencyLabel}</p>
                     </div>
                 `;
             } else {
                 // FLOWEY 404 / 505 EASTER EGG
                 area.innerHTML = `
-                    <div class="undertale-dialogue" style="border-color: #fff;">
+                    <div class="undertale-dialogue">
                         <div class="dialogue-avatar">🌻</div>
-                        <div class="dialogue-text">* Howdy! I'm FLOWEY. Flowey the Flower!<br>* Error 404/505: Ticket '${query}' doesn't exist in this world.<br>* In this helpdesk, it's SOLVE or BE SOLVED! Hee hee...</div>
+                        <div class="dialogue-text">* Howdy! I'm FLOWEY. Flowey the Flower!<br>* Error 404/505: Ticket '${query}' is nowhere to be found in memory.<br>* In this portal, it's RESOLVE or BE RESOLVED! Hee hee...</div>
                     </div>
                 `;
-                typeWriterSound();
+                playTextBlip();
             }
         }
 
         // --- UNDERTALE SAVE POINT & BAD TIME SIMULATOR ---
         document.getElementById('savePointBtn').addEventListener('click', () => {
             document.getElementById('saveModal').style.display = 'flex';
-            typeWriterSound();
+            playTextBlip();
         });
 
         function closeSaveModal() {
@@ -878,11 +930,12 @@
             
             const frameContainer = document.getElementById('sans-frame-container');
             frameContainer.style.display = 'block';
-            
-            // Embedded bad time simulator link without showing text link to user
             document.getElementById('sansIframe').src = "https://jcw87.github.io/c2-sans-fight/";
-            typeWriterSound();
+            playTextBlip();
         }
+
+        // Initialize state on boot
+        saveState();
     </script>
 </body>
 </html>
