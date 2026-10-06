@@ -1324,16 +1324,17 @@
                 // Default / HF Stream route
                 updateAIStatus(`Connecting to Hugging Face repository (${modelConfig.file})...`, "#ffff55");
                 await wllama.loadModelFromHF(
-                    { repo: modelConfig.repo, file: modelConfig.file },
-                    {
-                        n_ctx: 2048,
-                        progressCallback: ({ loaded, total }) => {
-                            const pct = Math.round((loaded / total) * 100);
-                            setProgressBar(pct);
-                            updateAIStatus(`Streaming AI Engine into Memory: ${pct}%`, "#ffff55");
-                        }
-                    }
-                );
+    modelConfig.repo,
+    modelConfig.file,
+    {
+        n_ctx: 2048,
+        progressCallback: ({ loaded, total }) => {
+            const pct = Math.round((loaded / total) * 100);
+            setProgressBar(pct);
+            updateAIStatus(`Streaming AI Engine into Memory: ${pct}%`, "#ffff55");
+        }
+    }
+);
 
                 isModelLoaded = true;
                 localStorage.setItem('ut_active_model_config', JSON.stringify(modelConfig));
