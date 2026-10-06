@@ -14,6 +14,7 @@
             --accent-green: #55ff55;
             --accent-red: #ff5555;
             --accent-cyan: #55ffff;
+            --accent-purple: #ff55ff;
             --font-family: 'VT323', monospace;
         }
 
@@ -37,7 +38,7 @@
 
         .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             border: 4px solid var(--border-color);
             padding: 20px;
             background-color: #000;
@@ -66,7 +67,7 @@
         .user-panel {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             font-size: 1.2rem;
         }
 
@@ -101,18 +102,19 @@
         /* NAVIGATION TABS */
         .nav-tabs {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 15px;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
             background: transparent;
             color: #888;
             border: 2px solid #888;
-            padding: 6px 16px;
-            font-size: 1.3rem;
+            padding: 6px 14px;
+            font-size: 1.2rem;
             cursor: pointer;
         }
 
@@ -225,21 +227,50 @@
             font-size: 1.4rem;
         }
 
-        /* TICKETS TABLE */
+        /* TICKETS & FORM STYLING */
         .ticket-form {
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin-bottom: 20px;
+            border: 2px solid var(--border-color);
+            padding: 15px;
         }
 
-        .ticket-input, .ticket-textarea {
+        .ticket-input, .ticket-textarea, .ticket-select {
             background: #000;
             border: 2px solid var(--border-color);
             color: #fff;
             padding: 8px;
             font-size: 1.2rem;
             outline: none;
+        }
+
+        .ticket-select option {
+            background: #000;
+            color: #fff;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #000;
+            color: #aaa;
+            border: 1px solid #aaa;
+            padding: 4px 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            background: #111;
         }
 
         .ticket-list {
@@ -249,6 +280,32 @@
         }
 
         .ticket-item {
+            border: 2px solid var(--border-color);
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border: 1px solid var(--accent-purple);
+            color: var(--accent-purple);
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        /* STAFF ROSTER LIST */
+        .staff-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .staff-item {
             border: 2px solid var(--border-color);
             padding: 10px;
             display: flex;
@@ -291,8 +348,8 @@
             <div class="user-panel">
                 <span id="roleLabel">* Role: Guest</span>
                 <button class="btn" id="audioToggleBtn" onclick="toggleAudio()">🔊 Sound: ON</button>
-                <button class="btn" id="loginBtn" onclick="openLoginModal()">Login (Gob)</button>
-                <button class="btn btn-danger hidden" id="logoutBtn" onclick="logoutGob()">Logout</button>
+                <button class="btn" id="loginBtn" onclick="openLoginModal()">Login</button>
+                <button class="btn btn-danger hidden" id="logoutBtn" onclick="logoutUser()">Logout</button>
             </div>
         </header>
 
@@ -308,6 +365,7 @@
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="switchTab('chatTab', this)">💬 AI Specialist</button>
             <button class="tab-btn" onclick="switchTab('ticketsTab', this)">🎫 Support Tickets</button>
+            <button class="tab-btn hidden" id="staffRosterTabBtn" onclick="switchTab('staffRosterTab', this)">👥 Staff Roster</button>
             <button class="tab-btn hidden" id="masterTabBtn" onclick="switchTab('masterTab', this)">⚡ Master Controls (Gob)</button>
         </div>
 
@@ -322,22 +380,60 @@
             </form>
         </div>
 
-        <!-- TAB 2: TICKETS PORTAL -->
+        <!-- TAB 2: CATEGORIZED SUPPORT TICKETS -->
         <div id="ticketsTab" class="tab-content">
             <h2 style="color: var(--accent-yellow); margin-bottom: 10px;">* Log Support Request</h2>
             <form class="ticket-form" onsubmit="createTicket(event)">
-                <input type="text" id="ticketTitle" class="ticket-input" placeholder="Issue Title (e.g., Chromebook WiFi Dropping)" required>
-                <textarea id="ticketDesc" class="ticket-textarea" rows="3" placeholder="Describe what happened..." required></textarea>
+                <input type="text" id="ticketTitle" class="ticket-input" placeholder="Issue Title (e.g., Xbox Controller Sync Error)" required>
+                <select id="ticketCategory" class="ticket-select" required>
+                    <option value="" disabled selected>-- Select Category --</option>
+                    <option value="Chromebook / Hardware">🛠️ Chromebook / Hardware</option>
+                    <option value="Software / Apps">💻 Software / Apps</option>
+                    <option value="Network / WiFi">🌐 Network / WiFi</option>
+                    <option value="Gaming Consoles">🎮 Gaming Consoles (Xbox/PS/Switch)</option>
+                    <option value="General Technical">❓ General Technical</option>
+                </select>
+                <textarea id="ticketDesc" class="ticket-textarea" rows="3" placeholder="Describe what happened step-by-step..." required></textarea>
                 <button type="submit" class="btn">SUBMIT TICKET</button>
             </form>
 
-            <h2 style="color: var(--accent-yellow); margin-bottom: 10px; margin-top: 20px;">* Active Tickets</h2>
+            <h2 style="color: var(--accent-yellow); margin-bottom: 10px; margin-top: 20px;">* Active Tickets Portal</h2>
+            
+            <!-- Category Filter Bar -->
+            <div class="category-filters" id="categoryFilterBar">
+                <button class="filter-btn active" onclick="setCategoryFilter('ALL', this)">ALL</button>
+                <button class="filter-btn" onclick="setCategoryFilter('Chromebook / Hardware', this)">🛠️ Hardware</button>
+                <button class="filter-btn" onclick="setCategoryFilter('Software / Apps', this)">💻 Software</button>
+                <button class="filter-btn" onclick="setCategoryFilter('Network / WiFi', this)">🌐 Network</button>
+                <button class="filter-btn" onclick="setCategoryFilter('Gaming Consoles', this)">🎮 Gaming</button>
+                <button class="filter-btn" onclick="setCategoryFilter('General Technical', this)">❓ General</button>
+            </div>
+
             <div class="ticket-list" id="ticketListContainer">
                 <!-- Dynamic Tickets -->
             </div>
         </div>
 
-        <!-- TAB 3: GOB MASTER CONTROLS -->
+        <!-- TAB 3: STAFF MANAGEMENT (STAFF & GOB) -->
+        <div id="staffRosterTab" class="tab-content">
+            <h2 style="color: var(--accent-yellow); margin-bottom: 10px;">* Helpdesk Staff Roster</h2>
+            
+            <div id="addStaffSection" class="hidden" style="border: 2px solid var(--border-color); padding: 15px; margin-bottom: 20px;">
+                <h3 style="color: var(--accent-cyan); margin-bottom: 10px;">+ Register New Staff Member (Gob Only)</h3>
+                <form onsubmit="handleAddStaff(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="newStaffUser" class="ticket-input" placeholder="Staff Username" required style="flex: 1; min-width: 150px;">
+                    <input type="password" id="newStaffPass" class="ticket-input" placeholder="Staff Password" required style="flex: 1; min-width: 150px;">
+                    <button type="submit" class="btn">ADD STAFF</button>
+                </form>
+            </div>
+
+            <h3 style="color: var(--accent-yellow); margin-bottom: 10px;">Authorized Support Personnel:</h3>
+            <div class="staff-list" id="staffListContainer">
+                <!-- Dynamic Staff List -->
+            </div>
+        </div>
+
+        <!-- TAB 4: GOB MASTER CONTROLS -->
         <div id="masterTab" class="tab-content">
             <h2 style="color: var(--accent-yellow); margin-bottom: 15px;">* Super Admin Wllama Engine Controls</h2>
             
@@ -361,12 +457,13 @@
         </div>
     </div>
 
-    <!-- LOGIN MODAL FOR GOB -->
+    <!-- AUTHENTICATION MODAL -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-body">
-            <h2 style="color: var(--accent-yellow); margin-bottom: 15px;">* SUPER ADMIN LOGIN</h2>
+            <h2 style="color: var(--accent-yellow); margin-bottom: 15px;">* SYSTEM LOGIN</h2>
             <form onsubmit="handleLoginSubmit(event)">
-                <input type="password" id="adminPasswordInput" class="ticket-input" placeholder="Enter Password" style="width: 100%; margin-bottom: 15px;" required>
+                <input type="text" id="loginUsernameInput" class="ticket-input" placeholder="Username (or 'Gob')" style="width: 100%; margin-bottom: 10px;" required>
+                <input type="password" id="loginPasswordInput" class="ticket-input" placeholder="Password" style="width: 100%; margin-bottom: 15px;" required>
                 <div style="display: flex; gap: 10px; justify-content: center;">
                     <button type="submit" class="btn">ENTER</button>
                     <button type="button" class="btn btn-danger" onclick="closeLoginModal()">CANCEL</button>
@@ -378,8 +475,10 @@
     <!-- UI GOVERNANCE & AUDIO SCRIPT -->
     <script>
         let isAudioEnabled = true;
-        let isGobLoggedIn = false;
+        let currentUser = { role: 'guest', username: '' };
         let tickets = [];
+        let staffAccounts = [];
+        let activeCategoryFilter = 'ALL';
 
         // RETRO AUDIO SYNTHESIS
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -414,45 +513,154 @@
             playTextBlip();
         }
 
-        // AUTH & GOB GOVERNANCE
+        // AUTHENTICATION SYSTEM
         function openLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
-            document.getElementById('adminPasswordInput').focus();
+            document.getElementById('loginUsernameInput').focus();
         }
 
         function closeLoginModal() {
             document.getElementById('loginModal').style.display = 'none';
-            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('loginUsernameInput').value = '';
+            document.getElementById('loginPasswordInput').value = '';
         }
 
         function handleLoginSubmit(e) {
             e.preventDefault();
-            const pass = document.getElementById('adminPasswordInput').value.trim();
-            if (pass === 'banzaiwashere') {
-                isGobLoggedIn = true;
-                document.getElementById('roleLabel').innerText = "* Role: Super Admin (Gob)";
-                document.getElementById('roleLabel').style.color = "var(--accent-yellow)";
-                document.getElementById('loginBtn').classList.add('hidden');
-                document.getElementById('logoutBtn').classList.remove('hidden');
-                document.getElementById('masterTabBtn').classList.remove('hidden');
+            const user = document.getElementById('loginUsernameInput').value.trim();
+            const pass = document.getElementById('loginPasswordInput').value.trim();
+
+            // 1. Check Super Admin "Gob"
+            if ((user.toLowerCase() === 'gob' || user === '') && pass === 'banzaiwashere') {
+                currentUser = { role: 'admin', username: 'Gob' };
+                updateUIState();
                 closeLoginModal();
-                alert("* Access Granted. Master Controls unlocked.");
-            } else {
-                alert("* Access Denied: Incorrect Password.");
+                alert("* Welcome Back, Super Admin Gob!");
+                return;
             }
+
+            // 2. Check Created Staff Accounts
+            const matchedStaff = staffAccounts.find(s => s.username.toLowerCase() === user.toLowerCase() && s.password === pass);
+            if (matchedStaff) {
+                currentUser = { role: 'staff', username: matchedStaff.username };
+                updateUIState();
+                closeLoginModal();
+                alert(`* Logged in as Staff Member: ${matchedStaff.username}`);
+                return;
+            }
+
+            alert("* Access Denied: Invalid Username or Password.");
         }
 
-        function logoutGob() {
-            isGobLoggedIn = false;
-            document.getElementById('roleLabel').innerText = "* Role: Guest";
-            document.getElementById('roleLabel').style.color = "#fff";
-            document.getElementById('loginBtn').classList.remove('hidden');
-            document.getElementById('logoutBtn').classList.add('hidden');
-            document.getElementById('masterTabBtn').classList.add('hidden');
+        function logoutUser() {
+            currentUser = { role: 'guest', username: '' };
+            updateUIState();
             switchTab('chatTab', document.querySelectorAll('.tab-btn')[0]);
         }
 
-        // TICKET MANAGEMENT (LOCAL STORAGE)
+        function updateUIState() {
+            const roleLabel = document.getElementById('roleLabel');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const masterTabBtn = document.getElementById('masterTabBtn');
+            const staffRosterTabBtn = document.getElementById('staffRosterTabBtn');
+            const addStaffSection = document.getElementById('addStaffSection');
+
+            if (currentUser.role === 'admin') {
+                roleLabel.innerText = "* Role: Super Admin (Gob)";
+                roleLabel.style.color = "var(--accent-yellow)";
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                masterTabBtn.classList.remove('hidden');
+                staffRosterTabBtn.classList.remove('hidden');
+                addStaffSection.classList.remove('hidden');
+            } else if (currentUser.role === 'staff') {
+                roleLabel.innerText = `* Role: Staff (${currentUser.username})`;
+                roleLabel.style.color = "var(--accent-cyan)";
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                masterTabBtn.classList.add('hidden');
+                staffRosterTabBtn.classList.remove('hidden');
+                addStaffSection.classList.add('hidden');
+            } else {
+                roleLabel.innerText = "* Role: Guest";
+                roleLabel.style.color = "#fff";
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                masterTabBtn.classList.add('hidden');
+                staffRosterTabBtn.classList.add('hidden');
+                addStaffSection.classList.add('hidden');
+            }
+
+            renderTickets();
+            renderStaffList();
+        }
+
+        // STAFF MANAGEMENT
+        function loadStaff() {
+            const saved = localStorage.getItem('ut_staff_accounts');
+            if (saved) {
+                try { staffAccounts = JSON.parse(saved); } catch(e) {}
+            } else {
+                // Default Staff Example
+                staffAccounts = [{ username: 'TechSupport_Sans', password: '123' }];
+                localStorage.setItem('ut_staff_accounts', JSON.stringify(staffAccounts));
+            }
+            renderStaffList();
+        }
+
+        function handleAddStaff(e) {
+            e.preventDefault();
+            if (currentUser.role !== 'admin') return;
+
+            const user = document.getElementById('newStaffUser').value.trim();
+            const pass = document.getElementById('newStaffPass').value.trim();
+
+            if (!user || !pass) return;
+
+            if (staffAccounts.some(s => s.username.toLowerCase() === user.toLowerCase())) {
+                alert("* Staff username already exists!");
+                return;
+            }
+
+            staffAccounts.push({ username: user, password: pass });
+            localStorage.setItem('ut_staff_accounts', JSON.stringify(staffAccounts));
+
+            document.getElementById('newStaffUser').value = '';
+            document.getElementById('newStaffPass').value = '';
+            renderStaffList();
+            playTextBlip();
+            alert(`* Staff account '${user}' created successfully.`);
+        }
+
+        function removeStaff(username) {
+            if (currentUser.role !== 'admin') return;
+            if (confirm(`* Remove staff member '${username}'?`)) {
+                staffAccounts = staffAccounts.filter(s => s.username !== username);
+                localStorage.setItem('ut_staff_accounts', JSON.stringify(staffAccounts));
+                renderStaffList();
+            }
+        }
+
+        function renderStaffList() {
+            const container = document.getElementById('staffListContainer');
+            if (staffAccounts.length === 0) {
+                container.innerHTML = `<div style="color: #888;">* No staff members registered.</div>`;
+                return;
+            }
+
+            container.innerHTML = staffAccounts.map(s => `
+                <div class="staff-item">
+                    <div>
+                        <strong style="color: var(--accent-cyan); font-size: 1.3rem;">👤 ${s.username}</strong>
+                        <span style="color: #888; font-size: 1rem; margin-left: 10px;">[Role: Support Staff]</span>
+                    </div>
+                    ${currentUser.role === 'admin' ? `<button class="btn btn-danger" onclick="removeStaff('${s.username}')">FIRE</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // TICKET MANAGEMENT WITH CATEGORIES
         function loadTickets() {
             const saved = localStorage.getItem('ut_tickets');
             if (saved) {
@@ -464,14 +672,25 @@
         function createTicket(e) {
             e.preventDefault();
             const title = document.getElementById('ticketTitle').value.trim();
+            const category = document.getElementById('ticketCategory').value;
             const desc = document.getElementById('ticketDesc').value.trim();
-            if (!title || !desc) return;
 
-            const newTicket = { id: Date.now(), title, desc, status: 'OPEN' };
+            if (!title || !category || !desc) return;
+
+            const newTicket = { 
+                id: Date.now(), 
+                title, 
+                category, 
+                desc, 
+                status: 'OPEN',
+                createdBy: currentUser.username || 'Guest'
+            };
+
             tickets.push(newTicket);
             localStorage.setItem('ut_tickets', JSON.stringify(tickets));
 
             document.getElementById('ticketTitle').value = '';
+            document.getElementById('ticketCategory').value = '';
             document.getElementById('ticketDesc').value = '';
             renderTickets();
             playTextBlip();
@@ -483,24 +702,47 @@
             renderTickets();
         }
 
+        function setCategoryFilter(category, btnEl) {
+            activeCategoryFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+            renderTickets();
+            playTextBlip();
+        }
+
         function renderTickets() {
             const container = document.getElementById('ticketListContainer');
-            if (tickets.length === 0) {
-                container.innerHTML = `<div style="color: #888;">* No active support tickets logged.</div>`;
+            
+            let filtered = tickets;
+            if (activeCategoryFilter !== 'ALL') {
+                filtered = tickets.filter(t => t.category === activeCategoryFilter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="color: #888; padding: 10px;">* No support tickets found under '${activeCategoryFilter}'.</div>`;
                 return;
             }
-            container.innerHTML = tickets.map(t => `
+
+            const canManage = currentUser.role === 'admin' || currentUser.role === 'staff';
+
+            container.innerHTML = filtered.map(t => `
                 <div class="ticket-item">
-                    <div>
+                    <div style="flex: 1;">
+                        <span class="category-badge">${t.category}</span>
+                        <br>
                         <strong style="color: var(--accent-cyan); font-size: 1.3rem;">#${t.id.toString().slice(-4)}: ${t.title}</strong>
                         <p style="color: #ccc; margin-top: 4px;">${t.desc}</p>
+                        <div style="font-size: 0.95rem; color: #888; margin-top: 5px;">Submitted by: ${t.createdBy}</div>
                     </div>
-                    <button class="btn btn-danger" onclick="deleteTicket(${t.id})">CLOSE</button>
+                    ${canManage ? `<button class="btn btn-danger" onclick="deleteTicket(${t.id})">RESOLVE / DELETE</button>` : ''}
                 </div>
             `).join('');
         }
 
-        window.addEventListener('DOMContentLoaded', loadTickets);
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStaff();
+            loadTickets();
+        });
     </script>
 
     <!-- PURE LOCAL LLM ENGINE + REAL-TIME WEB SEARCH (ZERO CANNED FALLBACKS) -->
