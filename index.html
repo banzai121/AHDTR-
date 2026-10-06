@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNDERTALE HELPDESK PORTAL</title>
+    <title>AUTOMATED HELPDESK PORTAL</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -745,7 +745,7 @@
         });
     </script>
 
-    <!-- PURE LOCAL LLM ENGINE + REAL-TIME WEB SEARCH (ZERO CANNED FALLBACKS) -->
+    <!-- PURE LOCAL LLM ENGINE + REAL-TIME WEB SEARCH -->
     <script type="module">
         import { Wllama } from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/index.js';
         import WasmFromCDN from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/wasm-from-cdn.js';
@@ -753,7 +753,6 @@
         let wllamaInstance = null;
         let isModelLoaded = false;
 
-        // SAFE INDEXEDDB PERSISTENCE WITH ENTERPRISE FALLBACK
         function openModelDB() {
             return new Promise((resolve, reject) => {
                 if (!window.indexedDB) return reject(new Error("IndexedDB disabled."));
@@ -950,7 +949,7 @@
             return "";
         }
 
-        // STRICT LLM CHAT HANDLER (NO FALLBACKS, NO CANNED RESPONSES)
+        // STRICT LLM CHAT HANDLER USING NATIVE COMPLETION (CHATML FORMATTED)
         window.handleChatSubmit = async function(e) {
             e.preventDefault();
             const inputEl = document.getElementById('chatInput');
@@ -988,19 +987,19 @@
                 // 1. Fetch Live Web Search Results
                 const searchContext = await fetchWebSearchSnippets(query);
 
-                // 2. Build Prompt
-                const systemPrompt = `You are an expert AI Support Specialist. Solve technical issues across all gaming consoles (Xbox, PlayStation, Nintendo), computers (Windows, Mac, Chromebook), and software. Use the live web search results below to give accurate, step-by-step troubleshooting steps. Do not summarize unless asked, and give concrete solutions.${searchContext}`;
+                // 2. Build ChatML Prompt Structure
+                const systemInstructions = `You are an expert AI Support Specialist. Solve technical issues across all gaming consoles (Xbox, PlayStation, Nintendo), computers (Windows, Mac, Chromebook), and software. Use the live web search results below to give accurate, step-by-step troubleshooting steps. Do not summarize unless asked, and give concrete solutions.${searchContext}`;
+                
+                const formattedPrompt = `<|im_start|>system\n${systemInstructions}<|im_end|>\n<|im_start|>user\n${query}<|im_end|>\n<|im_start|>assistant\n`;
 
-                // 3. Perform Inference
-                await wllamaInstance.createChatCompletion({
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        { role: "user", content: query }
-                    ],
-                    max_tokens: 600,
-                    temperature: 0.5,
-                    top_p: 0.9,
-                    repeat_penalty: 1.2,
+                // 3. Perform Inference via Native createCompletion
+                await wllamaInstance.createCompletion(formattedPrompt, {
+                    nPredict: 600,
+                    sampling: {
+                        temp: 0.5,
+                        top_p: 0.9,
+                        penalty_repeat: 1.2
+                    },
                     onNewToken: (token, piece, currentText) => {
                         botMsg.innerText = "* [AI Support Specialist]:\n" + currentText;
                         chatWindow.scrollTop = chatWindow.scrollHeight;
