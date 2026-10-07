@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Helpdesk</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --border-color: #ffffff;
+            --text-color: #ffffff;
+            --accent-yellow: #ffff55;
+            --accent-green: #55ff55;
+            --accent-red: #ff5555;
+            --accent-cyan: #55ffff;
+            --accent-purple: #ff55ff;
+            --font-family: 'VT323', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            border: 4px solid var(--border-color);
+            padding: 20px;
+            background-color: #000;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        /* HEADER & AUTH BAR */
+        header {
+            border-bottom: 4px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--accent-yellow);
+            text-shadow: 2px 2px #555;
+            letter-spacing: 2px;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+        }
+
+        .btn {
+            background: #000;
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 5px 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-danger {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+        .btn-danger:hover {
+            background: var(--accent-red);
+            color: #000;
+        }
+
+        /* NAVIGATION TABS */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: #888;
+            border: 2px solid #888;
+            padding: 6px 14px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-yellow);
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 8px var(--accent-yellow);
+        }
+
+        /* TAB PANELS */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* CHAT SYSTEM */
+        .chat-box {
+            border: 2px solid var(--border-color);
+            height: 380px;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #050505;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-msg {
+            max-width: 85%;
+            padding: 10px 14px;
+            border: 2px solid #fff;
+            font-size: 1.2rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .chat-msg.user {
+            align-self: flex-end;
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .chat-msg.bot {
+            align-self: flex-start;
+            border-color: var(--accent-yellow);
+            color: #fff;
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #000;
+            border: 2px solid var(--border-color);
+            color: #fff;
+            padding: 10px;
+            font-size: 1.3rem;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent-yellow);
+        }
+
+        /* MASTER CONTROLS & STATUS */
+        .status-box {
+            border: 2px dashed var(--border-color);
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 16px;
+            border: 2px solid #fff;
+            margin-top: 8px;
+            display: none;
+            background: #111;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-green);
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-card {
+            border: 2px solid var(--border-color);
+            padding: 15px;
+        }
+
+        .control-card h3 {
+            color: var(--accent-yellow);
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        /* TICKETS & FORM STYLING */
+        .ticket-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border-color);
+            padding: 15px;
+        }
+
+        .ticket-input, .ticket-textarea, .ticket-select {
+            background: #000;
+            border: 2px solid var(--border-color);
+            color: #fff;
+            padding: 8px;
+            font-size: 1.2rem;
+            outline: none;
+        }
+
+        .ticket-select option {
+            background: #000;
+            color: #fff;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #000;
+            color: #aaa;
+            border: 1px solid #aaa;
+            padding: 4px 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            background: #111;
+        }
+
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ticket-item {
+            border: 2px solid var(--border-color);
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border: 1px solid var(--accent-purple);
+            color: var(--accent-purple);
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        /* STAFF ROSTER LIST */
+        .staff-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .staff-item {
+            border: 2px solid var(--border-color);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-body {
+            border: 4px solid var(--border-color);
+            background: #000;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- BGM AUDIO ELEMENT -->
+    <audio id="bgmAudio" loop src="https://ia800203.us.archive.org/12/items/undertaleost_202004/Undertale%20-%20068%20-%20Death%20by%20Glamour.mp3"></audio>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div>
+                <h1>* UNDERTALE HELPDESK</h1>
+                <div style="color: #888; font-size: 1.1rem;">[ enterprise edition v2.5 ]</div>
+            </div>
+            <div class="user-panel">
+                <span id="roleLabel">* Role: Guest</span>
+                <button class="btn" id="bgmToggleBtn" onclick="toggleBGM()">🔊 BGM: ON</button>
+                <button class="btn" id="loginBtn" onclick="openLoginModal()">Login</button>
+                <button class="btn btn-danger hidden" id="logoutBtn" onclick="logoutUser()">Logout</button>
+            </div>
+        </header>
+
+        <!-- SYSTEM STATUS BAR -->
+        <div class="status-box">
+            <div id="aiLoadStatus">Status: Initializing System...</div>
+            <div class="progress-bar-bg" id="progressBarBg">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('chatTab', this)">💬 AI Specialist</button>
+            <button class="tab-btn" onclick="switchTab('ticketsTab', this)">🎫 Support Tickets</button>
+            <button class="tab-btn hidden" id="staffRosterTabBtn" onclick="switchTab('staffRosterTab', this)">👥 Staff Roster</button>
+            <button class="tab-btn hidden" id="masterTabBtn" onclick="switchTab('masterTab', this)">⚡ Master Controls (Gob)</button>
+        </div>
+
+        <!-- TAB 1: CHAT ASSISTANT -->
+        <div id="chatTab" class="tab-content active">
+            <div class="chat-box" id="chatWindow">
+                <div class="chat-msg bot">* Howdy! I am your AI Technical Specialist. Describe any issue with your Chromebook, Xbox, PC, or network.</div>
+            </div>
+            <form class="chat-input-group" onsubmit="handleChatSubmit(event)">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Type your technical issue..." autocomplete="off" required>
+                <button type="submit" id="sendBtn" class="btn">SEND</button>
+            </form>
+        </div>
+
+        <!-- TAB 2: CATEGORIZED SUPPORT TICKETS -->
+        <div id="ticketsTab" class="tab-content">
+            <h2 style="color: var(--accent-yellow); margin-bottom: 10px;">* Log Support Request</h2>
+            <form class="ticket-form" onsubmit="createTicket(event)">
+                <input type="text" id="ticketTitle" class="ticket-input" placeholder="Issue Title (e.g., Xbox Controller Sync Error)" required>
+                <select id="ticketCategory" class="ticket-select" required>
+                    <option value="" disabled selected>-- Select Category --</option>
+                    <option value="Chromebook / Hardware">🛠️ Chromebook / Hardware</option>
+                    <option value="Software / Apps">💻 Software / Apps</option>
+                    <option value="Network / WiFi">🌐 Network / WiFi</option>
+                    <option value="Gaming Consoles">🎮 Gaming Consoles (Xbox/PS/Switch)</option>
+                    <option value="General Technical">❓ General Technical</option>
+                </select>
+                <textarea id="ticketDesc" class="ticket-textarea" rows="3" placeholder="Describe what happened step-by-step..." required></textarea>
+                <button type="submit" class="btn">SUBMIT TICKET</button>
+            </form>
+
+            <h2 style="color: var(--accent-yellow); margin-bottom: 10px; margin-top: 20px;">* Active Tickets Portal</h2>
+            
+            <!-- Category Filter Bar -->
+            <div class="category-filters" id="categoryFilterBar">
+                <button class="filter-btn active" onclick="setCategoryFilter('ALL', this)">ALL</button>
+                <button class="filter-btn" onclick="setCategoryFilter('Chromebook / Hardware', this)">🛠️ Hardware</button>
+                <button class="filter-btn" onclick="setCategoryFilter('Software / Apps', this)">💻 Software</button>
+                <button class="filter-btn" onclick="setCategoryFilter('Network / WiFi', this)">🌐 Network</button>
+                <button class="filter-btn" onclick="setCategoryFilter('Gaming Consoles', this)">🎮 Gaming</button>
+                <button class="filter-btn" onclick="setCategoryFilter('General Technical', this)">❓ General</button>
+            </div>
+
+            <div class="ticket-list" id="ticketListContainer">
+                <!-- Dynamic Tickets -->
+            </div>
+        </div>
+
+        <!-- TAB 3: STAFF MANAGEMENT (GOB ONLY) -->
+        <div id="staffRosterTab" class="tab-content">
+            <h2 style="color: var(--accent-yellow); margin-bottom: 10px;">* Helpdesk Staff Roster</h2>
+            
+            <div id="addStaffSection" class="hidden" style="border: 2px solid var(--border-color); padding: 15px; margin-bottom: 20px;">
+                <h3 style="color: var(--accent-cyan); margin-bottom: 10px;">+ Register New Account (Gob Only)</h3>
+                <form onsubmit="handleAddStaff(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="newStaffUser" class="ticket-input" placeholder="Username" required style="flex: 1; min-width: 150px;">
+                    <input type="password" id="newStaffPass" class="ticket-input" placeholder="Password" required style="flex: 1; min-width: 150px;">
+                    <select id="newStaffRole" class="ticket-select" style="min-width: 120px;">
+                        <option value="STAFF">STAFF</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                    <button type="submit" class="btn">CREATE USER</button>
+                </form>
+            </div>
+
+            <h3 style="color: var(--accent-yellow); margin-bottom: 10px;">Authorized Accounts:</h3>
+            <div class="staff-list" id="staffListContainer">
+                <!-- Dynamic Staff List -->
+            </div>
+        </div>
+
+        <!-- TAB 4: GOB MASTER CONTROLS -->
+        <div id="masterTab" class="tab-content">
+            <h2 style="color: var(--accent-yellow); margin-bottom: 15px;">* Super Admin Master Controls</h2>
+            
+            <div class="control-grid">
+                <div class="control-card">
+                    <h3>Global Music Broadcast</h3>
+                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Broadcast a direct MP3 link (GitHub / Archive.org) to all connected users.</p>
+                    <input type="text" id="globalAudioUrlInput" class="ticket-input" placeholder="https://site.com/song.mp3" style="width:100%; margin-bottom:10px;">
+                    <button class="btn" onclick="updateGlobalBGMUrl()">UPDATE GLOBAL BGM</button>
+                </div>
+
+                <div class="control-card">
+                    <h3>Master Audio Controls</h3>
+                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Set global audio defaults across the network.</p>
+                    <label style="display:block; margin-bottom:8px;">Global Volume:</label>
+                    <input type="range" id="masterVolumeSlider" min="0" max="1" step="0.05" value="0.5" onchange="updateMasterVolume(this.value)" style="width: 100%; margin-bottom: 15px;">
+                    <button class="btn" onclick="toggleGlobalBgmState()">TOGGLE GLOBAL BGM STATE</button>
+                </div>
+
+                <div class="control-card">
+                    <h3>Upload Custom .GGUF</h3>
+                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Select a local model file to load into WebAssembly memory.</p>
+                    <input type="file" id="ggufFileInput" accept=".gguf" style="display:none;" onchange="loadManualGGUF(event)">
+                    <button class="btn" onclick="document.getElementById('ggufFileInput').click()">📂 Browse .GGUF File</button>
+                </div>
+
+                <div class="control-card">
+                    <h3>Engine Management</h3>
+                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Re-initialize or restore default Qwen 2.5 0.5B model.</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn" onclick="triggerModelReload()">🔄 Reload Engine</button>
+                        <button class="btn btn-danger" onclick="resetToDefaultModel()">♻️ Reset Default</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTHENTICATION MODAL -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-body">
+            <h2 style="color: var(--accent-yellow); margin-bottom: 15px;">* SYSTEM LOGIN</h2>
+            <form onsubmit="handleLoginSubmit(event)">
+                <input type="text" id="loginUsernameInput" class="ticket-input" placeholder="Username (e.g. 'Gob')" style="width: 100%; margin-bottom: 10px;" required>
+                <input type="password" id="loginPasswordInput" class="ticket-input" placeholder="Password" style="width: 100%; margin-bottom: 15px;" required>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button type="submit" class="btn">ENTER</button>
+                    <button type="button" class="btn btn-danger" onclick="closeLoginModal()">CANCEL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- UI GOVERNANCE & JSONBIN CLOUD AUDIO SCRIPT -->
+    <script>
+        const JSONBIN_CONFIG = {
+            BIN_ID: '6ac684b6ffd5d1605356c326',
+            API_KEY: '$2a$10$YOUR_MASTER_KEY_HERE', // Insert your JSONBin Master Key here
+            get URL() { return `https://api.jsonbin.io/v3/b/${this.BIN_ID}`; }
+        };
+
+        let isBgmUserEnabled = true;
+        let currentUser = { role: 'guest', username: '' };
+        let activeCategoryFilter = 'ALL';
+
+        let appState = {
+            users: [{ username: "Gob", password: "banzaiwashere", role: "ADMIN" }],
+            tickets: [],
+            audioState: {
+                volume: 0.5,
+                bgmPlaying: true,
+                trackUrl: "https://ia800203.us.archive.org/12/items/undertaleost_202004/Undertale%20-%20068%20-%20Death%20by%20Glamour.mp3"
+            }
+        };
+
+        // RETRO AUDIO TYPING BLIPS
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTextBlip() {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(140 + Math.random() * 40, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) {}
+        }
+
+        // BGM CONTROLLER
+        function playBGM() {
+            const bgm = document.getElementById('bgmAudio');
+            if (!bgm) return;
+
+            bgm.volume = appState.audioState.volume;
+
+            if (appState.audioState.bgmPlaying && isBgmUserEnabled) {
+                bgm.play().catch(() => {
+                    const unlock = () => {
+                        if (appState.audioState.bgmPlaying && isBgmUserEnabled) {
+                            bgm.play().catch(e => console.log("Autoplay waiting for interaction"));
+                        }
+                        window.removeEventListener('click', unlock);
+                        window.removeEventListener('keydown', unlock);
+                    };
+                    window.addEventListener('click', unlock);
+                    window.addEventListener('keydown', unlock);
+                });
+            } else {
+                bgm.pause();
+            }
+        }
+
+        function toggleBGM() {
+            isBgmUserEnabled = !isBgmUserEnabled;
+            document.getElementById('bgmToggleBtn').innerText = isBgmUserEnabled ? "🔊 BGM: ON" : "🔇 BGM: OFF";
+            playBGM();
+        }
+
+        // JSONBIN SYNC FUNCTIONS
+        async function syncFromCloud() {
+            try {
+                const res = await fetch(JSONBIN_CONFIG.URL, {
+                    headers: { 'X-Master-Key': JSONBIN_CONFIG.API_KEY }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.record) {
+                        appState.users = data.record.users || appState.users;
+                        appState.tickets = data.record.tickets || [];
+                        if (data.record.audioState) {
+                            const newAudio = data.record.audioState;
+                            const bgm = document.getElementById('bgmAudio');
+                            if (newAudio.trackUrl && newAudio.trackUrl !== bgm.src) {
+                                bgm.src = newAudio.trackUrl;
+                            }
+                            appState.audioState = newAudio;
+                            playBGM();
+                        }
+                        renderTickets();
+                        renderStaffList();
+                    }
+                }
+            } catch (err) {
+                console.error("Cloud fetch error:", err);
+            }
+        }
+
+        async function syncToCloud() {
+            try {
+                await fetch(JSONBIN_CONFIG.URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_CONFIG.API_KEY
+                    },
+                    body: JSON.stringify({
+                        users: appState.users,
+                        tickets: appState.tickets,
+                        audioState: appState.audioState
+                    })
+                });
+            } catch (err) {
+                console.error("Cloud save error:", err);
+            }
+        }
+
+        // MASTER CONTROLS ACTIONS (GOB ONLY)
+        function updateGlobalBGMUrl() {
+            if (currentUser.username !== 'Gob') return;
+            const url = document.getElementById('globalAudioUrlInput').value.trim();
+            if (!url) return;
+
+            appState.audioState.trackUrl = url;
+            const bgm = document.getElementById('bgmAudio');
+            bgm.src = url;
+            playBGM();
+            syncToCloud();
+            alert("* Global BGM URL updated!");
+        }
+
+        function updateMasterVolume(val) {
+            if (currentUser.username !== 'Gob') return;
+            appState.audioState.volume = parseFloat(val);
+            playBGM();
+            syncToCloud();
+        }
+
+        function toggleGlobalBgmState() {
+            if (currentUser.username !== 'Gob') return;
+            appState.audioState.bgmPlaying = !appState.audioState.bgmPlaying;
+            playBGM();
+            syncToCloud();
+        }
+
+        // NAVIGATION TABS
+        function switchTab(tabId, btnEl) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnEl.classList.add('active');
+            playTextBlip();
+        }
+
+        // AUTHENTICATION SYSTEM
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('loginUsernameInput').focus();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginUsernameInput').value = '';
+            document.getElementById('loginPasswordInput').value = '';
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUsernameInput').value.trim();
+            const pass = document.getElementById('loginPasswordInput').value.trim();
+
+            const found = appState.users.find(u => u.username.toLowerCase() === user.toLowerCase() && u.password === pass);
+            if (found) {
+                currentUser = { role: found.role === 'ADMIN' ? 'admin' : 'staff', username: found.username };
+                updateUIState();
+                closeLoginModal();
+                alert(`* Welcome back, ${found.username}!`);
+                return;
+            }
+
+            alert("* Access Denied: Invalid Username or Password.");
+        }
+
+        function logoutUser() {
+            currentUser = { role: 'guest', username: '' };
+            updateUIState();
+            switchTab('chatTab', document.querySelectorAll('.tab-btn')[0]);
+        }
+
+        function updateUIState() {
+            const roleLabel = document.getElementById('roleLabel');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const masterTabBtn = document.getElementById('masterTabBtn');
+            const staffRosterTabBtn = document.getElementById('staffRosterTabBtn');
+            const addStaffSection = document.getElementById('addStaffSection');
+
+            if (currentUser.username === 'Gob') {
+                roleLabel.innerText = "* Role: Super Admin (Gob)";
+                roleLabel.style.color = "var(--accent-yellow)";
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                masterTabBtn.classList.remove('hidden');
+                staffRosterTabBtn.classList.remove('hidden');
+                addStaffSection.classList.remove('hidden');
+            } else if (currentUser.role === 'staff' || currentUser.role === 'admin') {
+                roleLabel.innerText = `* Role: Authorized (${currentUser.username})`;
+                roleLabel.style.color = "var(--accent-cyan)";
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                masterTabBtn.classList.add('hidden');
+                staffRosterTabBtn.classList.remove('hidden');
+                addStaffSection.classList.add('hidden');
+            } else {
+                roleLabel.innerText = "* Role: Guest";
+                roleLabel.style.color = "#fff";
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                masterTabBtn.classList.add('hidden');
+                staffRosterTabBtn.classList.add('hidden');
+                addStaffSection.classList.add('hidden');
+            }
+
+            renderTickets();
+            renderStaffList();
+        }
+
+        // ACCOUNT MANAGEMENT (GOB ONLY)
+        function handleAddStaff(e) {
+            e.preventDefault();
+            if (currentUser.username !== 'Gob') return;
+
+            const user = document.getElementById('newStaffUser').value.trim();
+            const pass = document.getElementById('newStaffPass').value.trim();
+            const role = document.getElementById('newStaffRole').value;
+
+            if (!user || !pass) return;
+
+            if (appState.users.some(u => u.username.toLowerCase() === user.toLowerCase())) {
+                alert("* Username already exists!");
+                return;
+            }
+
+            appState.users.push({ username: user, password: pass, role });
+            syncToCloud();
+
+            document.getElementById('newStaffUser').value = '';
+            document.getElementById('newStaffPass').value = '';
+            renderStaffList();
+            playTextBlip();
+            alert(`* Account '${user}' created successfully.`);
+        }
+
+        function removeStaff(username) {
+            if (currentUser.username !== 'Gob') return;
+            if (username === 'Gob') {
+                alert("* Cannot remove primary admin Gob!");
+                return;
+            }
+            if (confirm(`* Fire and remove account '${username}'?`)) {
+                appState.users = appState.users.filter(u => u.username !== username);
+                syncToCloud();
+                renderStaffList();
+            }
+        }
+
+        function renderStaffList() {
+            const container = document.getElementById('staffListContainer');
+            if (appState.users.length === 0) {
+                container.innerHTML = `<div style="color: #888;">* No accounts registered.</div>`;
+                return;
+            }
+
+            container.innerHTML = appState.users.map(u => `
+                <div class="staff-item">
+                    <div>
+                        <strong style="color: var(--accent-cyan); font-size: 1.3rem;">👤 ${u.username}</strong>
+                        <span style="color: #888; font-size: 1rem; margin-left: 10px;">[Role: ${u.role}]</span>
+                    </div>
+                    ${currentUser.username === 'Gob' && u.username !== 'Gob' ? `<button class="btn btn-danger" onclick="removeStaff('${u.username}')">FIRE</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // TICKET MANAGEMENT WITH CATEGORIES
+        function createTicket(e) {
+            e.preventDefault();
+            const title = document.getElementById('ticketTitle').value.trim();
+            const category = document.getElementById('ticketCategory').value;
+            const desc = document.getElementById('ticketDesc').value.trim();
+
+            if (!title || !category || !desc) return;
+
+            const newTicket = { 
+                id: Date.now(), 
+                title, 
+                category, 
+                desc, 
+                status: 'OPEN',
+                createdBy: currentUser.username || 'Guest'
+            };
+
+            appState.tickets.push(newTicket);
+            syncToCloud();
+
+            document.getElementById('ticketTitle').value = '';
+            document.getElementById('ticketCategory').value = '';
+            document.getElementById('ticketDesc').value = '';
+            renderTickets();
+            playTextBlip();
+        }
+
+        function deleteTicket(id) {
+            appState.tickets = appState.tickets.filter(t => t.id !== id);
+            syncToCloud();
+            renderTickets();
+        }
+
+        function setCategoryFilter(category, btnEl) {
+            activeCategoryFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+            renderTickets();
+            playTextBlip();
+        }
+
+        function renderTickets() {
+            const container = document.getElementById('ticketListContainer');
+            
+            let filtered = appState.tickets;
+            if (activeCategoryFilter !== 'ALL') {
+                filtered = appState.tickets.filter(t => t.category === activeCategoryFilter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="color: #888; padding: 10px;">* No support tickets found under '${activeCategoryFilter}'.</div>`;
+                return;
+            }
+
+            const canManage = currentUser.role === 'admin' || currentUser.role === 'staff';
+
+            container.innerHTML = filtered.map(t => `
+                <div class="ticket-item">
+                    <div style="flex: 1;">
+                        <span class="category-badge">${t.category}</span>
+                        <br>
+                        <strong style="color: var(--accent-cyan); font-size: 1.3rem;">#${t.id.toString().slice(-4)}: ${t.title}</strong>
+                        <p style="color: #ccc; margin-top: 4px;">${t.desc}</p>
+                        <div style="font-size: 0.95rem; color: #888; margin-top: 5px;">Submitted by: ${t.createdBy}</div>
+                    </div>
+                    ${canManage ? `<button class="btn btn-danger" onclick="deleteTicket(${t.id})">RESOLVE / DELETE</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            syncFromCloud();
+            playBGM();
+            setInterval(syncFromCloud, 5000); // Continuous cloud polling loop
+        });
+    </script>
+
+    <!-- PURE LOCAL LLM ENGINE + REAL-TIME WEB SEARCH -->
+    <script type="module">
+        import { Wllama } from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/index.js';
+        import WasmFromCDN from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/wasm-from-cdn.js';
+
+        let wllamaInstance = null;
+        let isModelLoaded = false;
+
+        function openModelDB() {
+            return new Promise((resolve, reject) => {
+                if (!window.indexedDB) return reject(new Error("IndexedDB disabled."));
+                try {
+                    const req = indexedDB.open('UT_AI_Model_DB', 1);
+                    req.onupgradeneeded = () => req.result.createObjectStore('models');
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error || new Error("IndexedDB blocked."));
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
+        async function saveCustomModelToIDB(file) {
+            try {
+                const db = await openModelDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('models', 'readwrite');
+                    const store = tx.objectStore('models');
+                    store.put(file, 'active_custom_gguf');
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch (e) {
+                console.warn("Storage restricted, running in RAM for this session.");
+                return false;
+            }
+        }
+
+        async function getCustomModelFromIDB() {
+            try {
+                const db = await openModelDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('models', 'readonly');
+                    const store = tx.objectStore('models');
+                    const req = store.get('active_custom_gguf');
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function initWllama() {
+            if (!wllamaInstance) {
+                updateAIStatus("Initializing WebAssembly worker...", "#ffff55");
+                wllamaInstance = new Wllama(WasmFromCDN);
+            }
+            return wllamaInstance;
+        }
+
+        const DEFAULT_MODEL_CONFIG = {
+            type: 'hf',
+            repo: 'Qwen/Qwen2.5-0.5B-Instruct-GGUF',
+            file: 'qwen2.5-0.5b-instruct-q4_k_m.gguf'
+        };
+
+        async function bootActiveModel() {
+            showProgressBar(true);
+
+            let modelConfig = DEFAULT_MODEL_CONFIG;
+            const savedConfig = localStorage.getItem('ut_active_model_config');
+            if (savedConfig) {
+                try { modelConfig = JSON.parse(savedConfig); } catch(e) {}
+            }
+
+            try {
+                const wllama = await initWllama();
+
+                if (modelConfig.type === 'idb') {
+                    updateAIStatus(`Loading custom model '${modelConfig.name}'...`, "#ffff55");
+                    const storedBlob = await getCustomModelFromIDB();
+
+                    if (storedBlob) {
+                        await wllama.loadModel([ storedBlob ], {
+                            n_ctx: 2048,
+                            progressCallback: ({ loaded, total }) => {
+                                const pct = Math.round((loaded / total) * 100);
+                                setProgressBar(pct);
+                                updateAIStatus(`Loading '${modelConfig.name}': ${pct}%`, "#ffff55");
+                            }
+                        });
+
+                        isModelLoaded = true;
+                        updateAIStatus(`✓ Active LLM: ${modelConfig.name}`, "var(--accent-green)");
+                        showProgressBar(false);
+                        return;
+                    } else {
+                        modelConfig = DEFAULT_MODEL_CONFIG;
+                    }
+                }
+
+                updateAIStatus(`Connecting to AI Repository (${modelConfig.file})...`, "#ffff55");
+                await wllama.loadModelFromHF(
+                    modelConfig.repo,
+                    modelConfig.file,
+                    {
+                        n_ctx: 2048,
+                        progressCallback: ({ loaded, total }) => {
+                            const pct = Math.round((loaded / total) * 100);
+                            setProgressBar(pct);
+                            updateAIStatus(`Streaming AI Engine: ${pct}%`, "#ffff55");
+                        }
+                    }
+                );
+
+                isModelLoaded = true;
+                try { localStorage.setItem('ut_active_model_config', JSON.stringify(modelConfig)); } catch(e) {}
+
+                updateAIStatus("✓ Qwen 2.5 Local AI Engine Active", "var(--accent-green)");
+                showProgressBar(false);
+            } catch (err) {
+                console.error("Model boot failed:", err);
+                updateAIStatus(`❌ AI Boot Failed: ${err.message}`, "#ff5555");
+                showProgressBar(false);
+            }
+        }
+
+        // MANUAL .GGUF LOADER
+        window.loadManualGGUF = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showProgressBar(true);
+            updateAIStatus(`Loading '${file.name}' into RAM...`, "#ffff55");
+
+            try {
+                const saved = await saveCustomModelToIDB(file);
+                if (saved) {
+                    localStorage.setItem('ut_active_model_config', JSON.stringify({ type: 'idb', name: file.name }));
+                }
+
+                const wllama = await initWllama();
+                await wllama.loadModel([ file ], {
+                    n_ctx: 2048,
+                    progressCallback: ({ loaded, total }) => {
+                        const pct = Math.round((loaded / total) * 100);
+                        setProgressBar(pct);
+                        updateAIStatus(`Loading model to memory: ${pct}%`, "#ffff55");
+                    }
+                });
+
+                isModelLoaded = true;
+                updateAIStatus(`✓ Active Model: ${file.name}`, "var(--accent-green)");
+                showProgressBar(false);
+                alert(`* Custom model loaded into memory.`);
+            } catch (err) {
+                console.error(err);
+                updateAIStatus(`❌ GGUF Load Error: ${err.message}`, "#ff5555");
+                showProgressBar(false);
+            }
+        };
+
+        window.triggerModelReload = function() { bootActiveModel(); };
+
+        window.resetToDefaultModel = function() {
+            if (confirm("* Reset active AI model back to default Qwen 2.5?")) {
+                try { localStorage.setItem('ut_active_model_config', JSON.stringify(DEFAULT_MODEL_CONFIG)); } catch(e) {}
+                bootActiveModel();
+            }
+        };
+
+        // MULTI-PROXY LIVE WEB SEARCH SCRAPER
+        async function fetchWebSearchSnippets(userQuery) {
+            const targetUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(userQuery)}`;
+            const proxies = [
+                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+            ];
+
+            for (const proxy of proxies) {
+                try {
+                    const res = await fetch(proxy, { signal: AbortSignal.timeout(4000) });
+                    if (!res.ok) continue;
+                    const html = await res.text();
+                    
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const snippets = Array.from(doc.querySelectorAll('.result__snippet'))
+                        .slice(0, 4)
+                        .map((el, i) => `${i + 1}. ${el.textContent.trim()}`)
+                        .filter(Boolean)
+                        .join('\n');
+
+                    if (snippets) {
+                        return `\n[LIVE SEARCH RESULTS FOR "${userQuery}"]:\n${snippets}\n`;
+                    }
+                } catch (e) {
+                    console.warn("Search proxy failed, trying next...", e);
+                }
+            }
+            return "";
+        }
+
+        // STRICT LLM CHAT HANDLER USING FLATTENED COMPLETION OPTIONS
+        window.handleChatSubmit = async function(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById('chatInput');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            const chatWindow = document.getElementById('chatWindow');
+            const sendBtn = document.getElementById('sendBtn');
+
+            // Render User Query
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-msg user';
+            userMsg.innerText = query;
+            chatWindow.appendChild(userMsg);
+
+            inputEl.value = "";
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            // Render Bot Stream Box
+            const botMsg = document.createElement('div');
+            botMsg.className = 'chat-msg bot';
+            botMsg.innerText = "* [Searching web & initializing local AI reasoning...]";
+            chatWindow.appendChild(botMsg);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            sendBtn.disabled = true;
+
+            if (!isModelLoaded || !wllamaInstance) {
+                botMsg.innerText = "❌ ERROR: Local AI Engine is offline. Load or reload the model in Master Controls above.";
+                sendBtn.disabled = false;
+                return;
+            }
+
+            try {
+                // 1. Fetch Live Web Search Results
+                const searchContext = await fetchWebSearchSnippets(query);
+
+                // 2. Build ChatML Prompt Structure
+                const systemInstructions = `You are an expert AI Support Specialist. Solve technical issues across all gaming consoles (Xbox, PlayStation, Nintendo), computers (Windows, Mac, Chromebook), and software. Use the live web search results below to give accurate, step-by-step troubleshooting steps. Do not summarize unless asked, and give concrete solutions.${searchContext}`;
+                
+                const formattedPrompt = `<|im_start|>system\n${systemInstructions}<|im_end|>\n<|im_start|>user\n${query}<|im_end|>\n<|im_start|>assistant\n`;
+
+                // 3. Perform Inference via Native createCompletion with Flattened Options
+                await wllamaInstance.createCompletion(formattedPrompt, {
+                    nPredict: 600,
+                    temp: 0.5,
+                    top_p: 0.9,
+                    penalty_repeat: 1.2,
+                    onNewToken: (token, piece, currentText) => {
+                        botMsg.innerText = "* [AI Support Specialist]:\n" + currentText;
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                        if (typeof playTextBlip === 'function') playTextBlip();
+                    }
+                });
+
+            } catch (err) {
+                console.error("LLM Inference Error:", err);
+                botMsg.innerText = `❌ Inference Error: ${err.message}`;
+            }
+
+            sendBtn.disabled = false;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        };
+
+        function updateAIStatus(msg, color) {
+            const el = document.getElementById('aiLoadStatus');
+            if (el) {
+                el.innerText = `Status: ${msg}`;
+                el.style.color = color;
+            }
+        }
+
+        function showProgressBar(show) {
+            const el = document.getElementById('progressBarBg');
+            if (el) el.style.display = show ? 'block' : 'none';
+        }
+
+        function setProgressBar(pct) {
+            const el = document.getElementById('progressBarFill');
+            if (el) el.style.width = `${pct}%`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            bootActiveModel();
+        });
+    </script>
+</body>
+</html>
