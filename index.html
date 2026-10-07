@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Helpdesk</title>
+    <title>AUTOMATED HELPDESK PORTAL</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -34,6 +34,18 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* FALLING RETRO SNOW CANVAS */
+        #snowCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
@@ -43,6 +55,8 @@
             padding: 20px;
             background-color: #000;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
         }
 
         /* HEADER & AUTH BAR */
@@ -57,6 +71,18 @@
             gap: 10px;
         }
 
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .save-star-gif {
+            width: 32px;
+            height: 32px;
+            image-rendering: pixelated;
+        }
+
         h1 {
             font-size: 2.2rem;
             color: var(--accent-yellow);
@@ -69,6 +95,21 @@
             align-items: center;
             gap: 12px;
             font-size: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .volume-control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1.1rem;
+            color: var(--accent-cyan);
+        }
+
+        .volume-slider {
+            width: 75px;
+            cursor: pointer;
+            accent-color: var(--accent-yellow);
         }
 
         .btn {
@@ -338,19 +379,32 @@
 </head>
 <body>
 
-    <!-- BGM AUDIO ELEMENT -->
+    <!-- FALLING RETRO SNOW CANVAS -->
+    <canvas id="snowCanvas"></canvas>
+
+    <!-- HARD-LOCKED BGM TRACK: DEATH BY GLAMOUR -->
     <audio id="bgmAudio" loop src="https://ia800203.us.archive.org/12/items/undertaleost_202004/Undertale%20-%20068%20-%20Death%20by%20Glamour.mp3"></audio>
 
     <div class="container">
         <!-- HEADER -->
         <header>
-            <div>
-                <h1>* UNDERTALE HELPDESK</h1>
-                <div style="color: #888; font-size: 1.1rem;">[ enterprise edition v2.5 ]</div>
+            <div class="header-title-container">
+                <img src="undertale.gif" alt="Save Point" class="save-star-gif">
+                <div>
+                    <h1>* AI HELPDESK</h1>
+                    <div style="color: #888; font-size: 1.1rem;">[ enterprise edition v2.5 ]</div>
+                </div>
             </div>
             <div class="user-panel">
                 <span id="roleLabel">* Role: Guest</span>
+                
                 <button class="btn" id="bgmToggleBtn" onclick="toggleBGM()">🔊 BGM: ON</button>
+                
+                <div class="volume-control-group">
+                    <span>VOL:</span>
+                    <input type="range" id="bgmVolumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="setBgmVolume(this.value)">
+                </div>
+
                 <button class="btn" id="loginBtn" onclick="openLoginModal()">Login</button>
                 <button class="btn btn-danger hidden" id="logoutBtn" onclick="logoutUser()">Logout</button>
             </div>
@@ -400,20 +454,27 @@
                 <button type="submit" class="btn">SUBMIT TICKET</button>
             </form>
 
-            <h2 style="color: var(--accent-yellow); margin-bottom: 10px; margin-top: 20px;">* Active Tickets Portal</h2>
-            
-            <!-- Category Filter Bar -->
-            <div class="category-filters" id="categoryFilterBar">
-                <button class="filter-btn active" onclick="setCategoryFilter('ALL', this)">ALL</button>
-                <button class="filter-btn" onclick="setCategoryFilter('Chromebook / Hardware', this)">🛠️ Hardware</button>
-                <button class="filter-btn" onclick="setCategoryFilter('Software / Apps', this)">💻 Software</button>
-                <button class="filter-btn" onclick="setCategoryFilter('Network / WiFi', this)">🌐 Network</button>
-                <button class="filter-btn" onclick="setCategoryFilter('Gaming Consoles', this)">🎮 Gaming</button>
-                <button class="filter-btn" onclick="setCategoryFilter('General Technical', this)">❓ General</button>
+            <!-- STAFF/ADMIN ONLY ACTIVE TICKETS SECTION -->
+            <div id="activeTicketsSection">
+                <h2 style="color: var(--accent-yellow); margin-bottom: 10px; margin-top: 20px;">* Active Tickets Portal</h2>
+                
+                <div class="category-filters" id="categoryFilterBar">
+                    <button class="filter-btn active" onclick="setCategoryFilter('ALL', this)">ALL</button>
+                    <button class="filter-btn" onclick="setCategoryFilter('Chromebook / Hardware', this)">🛠️ Hardware</button>
+                    <button class="filter-btn" onclick="setCategoryFilter('Software / Apps', this)">💻 Software</button>
+                    <button class="filter-btn" onclick="setCategoryFilter('Network / WiFi', this)">🌐 Network</button>
+                    <button class="filter-btn" onclick="setCategoryFilter('Gaming Consoles', this)">🎮 Gaming</button>
+                    <button class="filter-btn" onclick="setCategoryFilter('General Technical', this)">❓ General</button>
+                </div>
+
+                <div class="ticket-list" id="ticketListContainer">
+                    <!-- Dynamic Tickets -->
+                </div>
             </div>
 
-            <div class="ticket-list" id="ticketListContainer">
-                <!-- Dynamic Tickets -->
+            <!-- GUEST NOTICE -->
+            <div id="guestTicketNotice" class="hidden" style="color: #888; margin-top: 20px; border: 2px dashed #444; padding: 15px; text-align: center; font-size: 1.2rem;">
+                * [ NOTICE ]: Ticket submissions are open to guests. Active ticket review is restricted to authorized staff.
             </div>
         </div>
 
@@ -442,24 +503,9 @@
 
         <!-- TAB 4: GOB MASTER CONTROLS -->
         <div id="masterTab" class="tab-content">
-            <h2 style="color: var(--accent-yellow); margin-bottom: 15px;">* Super Admin Master Controls</h2>
+            <h2 style="color: var(--accent-yellow); margin-bottom: 15px;">* Super Admin Wllama Engine Controls</h2>
             
             <div class="control-grid">
-                <div class="control-card">
-                    <h3>Global Music Broadcast</h3>
-                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Broadcast a direct MP3 link (GitHub / Archive.org) to all connected users.</p>
-                    <input type="text" id="globalAudioUrlInput" class="ticket-input" placeholder="https://site.com/song.mp3" style="width:100%; margin-bottom:10px;">
-                    <button class="btn" onclick="updateGlobalBGMUrl()">UPDATE GLOBAL BGM</button>
-                </div>
-
-                <div class="control-card">
-                    <h3>Master Audio Controls</h3>
-                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Set global audio defaults across the network.</p>
-                    <label style="display:block; margin-bottom:8px;">Global Volume:</label>
-                    <input type="range" id="masterVolumeSlider" min="0" max="1" step="0.05" value="0.5" onchange="updateMasterVolume(this.value)" style="width: 100%; margin-bottom: 15px;">
-                    <button class="btn" onclick="toggleGlobalBgmState()">TOGGLE GLOBAL BGM STATE</button>
-                </div>
-
                 <div class="control-card">
                     <h3>Upload Custom .GGUF</h3>
                     <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Select a local model file to load into WebAssembly memory.</p>
@@ -494,11 +540,59 @@
         </div>
     </div>
 
-    <!-- UI GOVERNANCE & JSONBIN CLOUD AUDIO SCRIPT -->
+    <!-- RETRO SNOW ENGINE -->
+    <script>
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+        let snowflakes = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 65; i++) {
+            snowflakes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 3 + 1,
+                speed: Math.random() * 0.8 + 0.4
+            });
+        }
+
+        function drawSnow() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            for (let i = 0; i < snowflakes.length; i++) {
+                let p = snowflakes[i];
+                ctx.rect(p.x, p.y, p.size, p.size);
+            }
+            ctx.fill();
+            updateSnow();
+            requestAnimationFrame(drawSnow);
+        }
+
+        function updateSnow() {
+            for (let i = 0; i < snowflakes.length; i++) {
+                let p = snowflakes[i];
+                p.y += p.speed;
+                p.x += Math.sin(p.y * 0.03) * 0.4;
+                if (p.y > canvas.height) {
+                    snowflakes[i] = { x: Math.random() * canvas.width, y: -10, size: p.size, speed: p.speed };
+                }
+            }
+        }
+        drawSnow();
+    </script>
+
+    <!-- UI GOVERNANCE & JSONBIN INSTANT SYNC SCRIPT -->
     <script>
         const JSONBIN_CONFIG = {
             BIN_ID: '6ac684b6ffd5d1605356c326',
-            API_KEY: '$2a$10$YOUR_MASTER_KEY_HERE', // Insert your JSONBin Master Key here
+            API_KEY: '$2a$10$YOUR_MASTER_KEY_HERE', // Insert your JSONBin Master Key here if required by bin settings
             get URL() { return `https://api.jsonbin.io/v3/b/${this.BIN_ID}`; }
         };
 
@@ -508,12 +602,7 @@
 
         let appState = {
             users: [{ username: "Gob", password: "banzaiwashere", role: "ADMIN" }],
-            tickets: [],
-            audioState: {
-                volume: 0.5,
-                bgmPlaying: true,
-                trackUrl: "https://ia800203.us.archive.org/12/items/undertaleost_202004/Undertale%20-%20068%20-%20Death%20by%20Glamour.mp3"
-            }
+            tickets: []
         };
 
         // RETRO AUDIO TYPING BLIPS
@@ -539,14 +628,10 @@
             const bgm = document.getElementById('bgmAudio');
             if (!bgm) return;
 
-            bgm.volume = appState.audioState.volume;
-
-            if (appState.audioState.bgmPlaying && isBgmUserEnabled) {
+            if (isBgmUserEnabled) {
                 bgm.play().catch(() => {
                     const unlock = () => {
-                        if (appState.audioState.bgmPlaying && isBgmUserEnabled) {
-                            bgm.play().catch(e => console.log("Autoplay waiting for interaction"));
-                        }
+                        if (isBgmUserEnabled) bgm.play().catch(e => console.log("Autoplay waiting for interaction"));
                         window.removeEventListener('click', unlock);
                         window.removeEventListener('keydown', unlock);
                     };
@@ -564,6 +649,11 @@
             playBGM();
         }
 
+        function setBgmVolume(val) {
+            const bgm = document.getElementById('bgmAudio');
+            if (bgm) bgm.volume = parseFloat(val);
+        }
+
         // JSONBIN SYNC FUNCTIONS
         async function syncFromCloud() {
             try {
@@ -575,15 +665,6 @@
                     if (data.record) {
                         appState.users = data.record.users || appState.users;
                         appState.tickets = data.record.tickets || [];
-                        if (data.record.audioState) {
-                            const newAudio = data.record.audioState;
-                            const bgm = document.getElementById('bgmAudio');
-                            if (newAudio.trackUrl && newAudio.trackUrl !== bgm.src) {
-                                bgm.src = newAudio.trackUrl;
-                            }
-                            appState.audioState = newAudio;
-                            playBGM();
-                        }
                         renderTickets();
                         renderStaffList();
                     }
@@ -603,41 +684,12 @@
                     },
                     body: JSON.stringify({
                         users: appState.users,
-                        tickets: appState.tickets,
-                        audioState: appState.audioState
+                        tickets: appState.tickets
                     })
                 });
             } catch (err) {
-                console.error("Cloud save error:", err);
+                console.error("Instant cloud save error:", err);
             }
-        }
-
-        // MASTER CONTROLS ACTIONS (GOB ONLY)
-        function updateGlobalBGMUrl() {
-            if (currentUser.username !== 'Gob') return;
-            const url = document.getElementById('globalAudioUrlInput').value.trim();
-            if (!url) return;
-
-            appState.audioState.trackUrl = url;
-            const bgm = document.getElementById('bgmAudio');
-            bgm.src = url;
-            playBGM();
-            syncToCloud();
-            alert("* Global BGM URL updated!");
-        }
-
-        function updateMasterVolume(val) {
-            if (currentUser.username !== 'Gob') return;
-            appState.audioState.volume = parseFloat(val);
-            playBGM();
-            syncToCloud();
-        }
-
-        function toggleGlobalBgmState() {
-            if (currentUser.username !== 'Gob') return;
-            appState.audioState.bgmPlaying = !appState.audioState.bgmPlaying;
-            playBGM();
-            syncToCloud();
         }
 
         // NAVIGATION TABS
@@ -691,6 +743,8 @@
             const masterTabBtn = document.getElementById('masterTabBtn');
             const staffRosterTabBtn = document.getElementById('staffRosterTabBtn');
             const addStaffSection = document.getElementById('addStaffSection');
+            const activeTicketsSection = document.getElementById('activeTicketsSection');
+            const guestTicketNotice = document.getElementById('guestTicketNotice');
 
             if (currentUser.username === 'Gob') {
                 roleLabel.innerText = "* Role: Super Admin (Gob)";
@@ -700,14 +754,18 @@
                 masterTabBtn.classList.remove('hidden');
                 staffRosterTabBtn.classList.remove('hidden');
                 addStaffSection.classList.remove('hidden');
+                activeTicketsSection.classList.remove('hidden');
+                guestTicketNotice.classList.add('hidden');
             } else if (currentUser.role === 'staff' || currentUser.role === 'admin') {
-                roleLabel.innerText = `* Role: Authorized (${currentUser.username})`;
+                roleLabel.innerText = `* Role: Staff (${currentUser.username})`;
                 roleLabel.style.color = "var(--accent-cyan)";
                 loginBtn.classList.add('hidden');
                 logoutBtn.classList.remove('hidden');
                 masterTabBtn.classList.add('hidden');
                 staffRosterTabBtn.classList.remove('hidden');
                 addStaffSection.classList.add('hidden');
+                activeTicketsSection.classList.remove('hidden');
+                guestTicketNotice.classList.add('hidden');
             } else {
                 roleLabel.innerText = "* Role: Guest";
                 roleLabel.style.color = "#fff";
@@ -716,14 +774,16 @@
                 masterTabBtn.classList.add('hidden');
                 staffRosterTabBtn.classList.add('hidden');
                 addStaffSection.classList.add('hidden');
+                activeTicketsSection.classList.add('hidden');
+                guestTicketNotice.classList.remove('hidden');
             }
 
             renderTickets();
             renderStaffList();
         }
 
-        // ACCOUNT MANAGEMENT (GOB ONLY)
-        function handleAddStaff(e) {
+        // ACCOUNT MANAGEMENT (GOB ONLY - INSTANT CLOUD SYNC)
+        async function handleAddStaff(e) {
             e.preventDefault();
             if (currentUser.username !== 'Gob') return;
 
@@ -739,16 +799,18 @@
             }
 
             appState.users.push({ username: user, password: pass, role });
-            syncToCloud();
+            
+            // INSTANT PUSH TO CLOUD
+            await syncToCloud();
 
             document.getElementById('newStaffUser').value = '';
             document.getElementById('newStaffPass').value = '';
             renderStaffList();
             playTextBlip();
-            alert(`* Account '${user}' created successfully.`);
+            alert(`* Account '${user}' created and saved to cloud instantly.`);
         }
 
-        function removeStaff(username) {
+        async function removeStaff(username) {
             if (currentUser.username !== 'Gob') return;
             if (username === 'Gob') {
                 alert("* Cannot remove primary admin Gob!");
@@ -756,7 +818,10 @@
             }
             if (confirm(`* Fire and remove account '${username}'?`)) {
                 appState.users = appState.users.filter(u => u.username !== username);
-                syncToCloud();
+                
+                // INSTANT PUSH TO CLOUD
+                await syncToCloud();
+                
                 renderStaffList();
             }
         }
@@ -779,8 +844,8 @@
             `).join('');
         }
 
-        // TICKET MANAGEMENT WITH CATEGORIES
-        function createTicket(e) {
+        // TICKET MANAGEMENT (INSTANT CLOUD SYNC)
+        async function createTicket(e) {
             e.preventDefault();
             const title = document.getElementById('ticketTitle').value.trim();
             const category = document.getElementById('ticketCategory').value;
@@ -798,18 +863,24 @@
             };
 
             appState.tickets.push(newTicket);
-            syncToCloud();
+            
+            // INSTANT PUSH TO CLOUD
+            await syncToCloud();
 
             document.getElementById('ticketTitle').value = '';
             document.getElementById('ticketCategory').value = '';
             document.getElementById('ticketDesc').value = '';
             renderTickets();
             playTextBlip();
+            alert("* Support ticket submitted and synced to cloud!");
         }
 
-        function deleteTicket(id) {
+        async function deleteTicket(id) {
             appState.tickets = appState.tickets.filter(t => t.id !== id);
-            syncToCloud();
+            
+            // INSTANT PUSH TO CLOUD
+            await syncToCloud();
+            
             renderTickets();
         }
 
@@ -852,8 +923,9 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             syncFromCloud();
+            updateUIState();
             playBGM();
-            setInterval(syncFromCloud, 5000); // Continuous cloud polling loop
+            setInterval(syncFromCloud, 5000); // Polling backup loop
         });
     </script>
 
