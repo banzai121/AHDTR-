@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI HELPDESK PORTAL</title>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <title>Determination Helpdesk Ticket Router</title>
+    <!-- Undertale Monospace Monospaced Typography -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <style>
         :root {
             --bg-color: #000000;
-            --border-color: #ffffff;
             --text-color: #ffffff;
-            --accent-yellow: #ffff55;
-            --accent-green: #55ff55;
-            --accent-red: #ff5555;
-            --accent-cyan: #55ffff;
-            --accent-purple: #ff55ff;
-            --font-family: 'VT323', monospace;
+            --border-color: #ffffff;
+            --font-family: 'VT323', 'Courier New', Courier, monospace;
+            --accent-yellow: #ffff00;
+            --accent-cyan: #00ffff;
+            --accent-red: #ff3333;
+            --accent-green: #00ff00;
+            --accent-purple: #b366ff;
         }
 
         * {
@@ -37,6 +38,7 @@
             overflow-x: hidden;
         }
 
+        /* FALLING RETRO SNOW CANVAS */
         #snowCanvas {
             position: fixed;
             top: 0;
@@ -58,6 +60,7 @@
             z-index: 1;
         }
 
+        /* HEADER & AUTH BAR */
         header {
             border-bottom: 4px solid var(--border-color);
             padding-bottom: 15px;
@@ -88,12 +91,78 @@
             letter-spacing: 2px;
         }
 
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .volume-control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1.1rem;
+            color: var(--accent-cyan);
+        }
+
+        .volume-slider {
+            width: 75px;
+            cursor: pointer;
+            accent-color: var(--accent-yellow);
+        }
+
+        .btn {
+            background: #000;
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 5px 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-danger {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+        .btn-danger:hover {
+            background: var(--accent-red);
+            color: #000;
+        }
+
+        .btn-stop {
+            border-color: var(--accent-red) !important;
+            background-color: var(--accent-red) !important;
+            color: #000 !important;
+            font-weight: bold;
+            animation: pulse-stop 0.8s infinite alternate;
+        }
+
+        @keyframes pulse-stop {
+            from { transform: scale(1); }
+            to { transform: scale(1.03); }
+        }
+
+        /* NAVIGATION TABS */
         .nav-tabs {
             display: flex;
             gap: 8px;
             margin-bottom: 15px;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
@@ -111,14 +180,15 @@
             box-shadow: 0 0 8px var(--accent-yellow);
         }
 
+        /* TAB PANELS */
         .tab-content {
             display: none;
         }
-
         .tab-content.active {
             display: block;
         }
 
+        /* CHAT SYSTEM */
         .chat-box {
             border: 2px solid var(--border-color);
             height: 380px;
@@ -168,209 +238,457 @@
             outline: none;
         }
 
-        .btn {
-            background: #000;
-            color: #fff;
-            border: 2px solid #fff;
-            padding: 6px 14px;
-            font-size: 1.2rem;
-            cursor: pointer;
+        .chat-input:focus {
+            border-color: var(--accent-yellow);
         }
 
-        .btn:hover {
-            background: #fff;
-            color: #000;
-        }
-
-        .btn-stop {
-            border-color: var(--accent-red);
-            color: var(--accent-red);
-        }
-
-        .btn-stop:hover {
-            background: var(--accent-red);
-            color: #000;
-        }
-
-        .ticket-card {
-            border: 2px solid var(--border-color);
+        /* STATUS BOX */
+        .status-box {
+            border: 2px dashed var(--border-color);
             padding: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 16px;
+            border: 2px solid #fff;
+            margin-top: 8px;
+            display: none;
             background: #111;
         }
 
-        .ticket-header {
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-green);
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-card {
+            border: 2px solid var(--border-color);
+            padding: 15px;
+        }
+
+        .control-card h3 {
+            color: var(--accent-yellow);
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        /* TICKETS & FORM STYLING */
+        .ticket-form {
             display: flex;
-            justify-content: space-between;
-            color: var(--accent-yellow);
-            margin-bottom: 6px;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border-color);
+            padding: 15px;
         }
 
-        .badge {
-            padding: 2px 6px;
-            font-size: 0.9rem;
-            border: 1px solid currentColor;
-            display: inline-block;
-        }
-
-        .priority-high { color: var(--accent-red); }
-        .priority-medium { color: var(--accent-yellow); }
-        .priority-low { color: var(--accent-green); }
-
-        .ticket-draft-box {
-            border: 2px dashed var(--accent-yellow);
-            background: #1a1a00;
-            padding: 10px;
-            margin-top: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 4px;
-            color: var(--accent-yellow);
-        }
-
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
+        .ticket-input, .ticket-textarea, .ticket-select {
             background: #000;
-            border: 2px solid #fff;
+            border: 2px solid var(--border-color);
             color: #fff;
             padding: 8px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            outline: none;
         }
 
-        .master-panel {
-            border: 2px dashed var(--accent-purple);
-            padding: 15px;
+        .ticket-select option {
+            background: #000;
+            color: #fff;
+        }
+
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ticket-item {
+            border: 2px solid var(--border-color);
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            background-color: #050505;
+        }
+
+        /* PRIORITY BADGES */
+        .p1-badge { border: 2px solid var(--accent-red); color: var(--accent-red); padding: 2px 8px; font-weight: bold; animation: p1-pulse 1s infinite alternate; }
+        .p2-badge { border: 1px solid var(--accent-yellow); color: var(--accent-yellow); padding: 2px 8px; }
+        .p3-badge { border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 2px 8px; }
+        .p4-badge { border: 1px solid #888; color: #aaa; padding: 2px 8px; }
+
+        @keyframes p1-pulse {
+            from { box-shadow: 0 0 2px var(--accent-red); }
+            to { box-shadow: 0 0 10px var(--accent-red); }
+        }
+
+        .staff-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             margin-top: 15px;
-            background: #0a000a;
         }
 
-        .master-panel h3 {
-            color: var(--accent-purple);
-            margin-bottom: 12px;
+        .staff-item {
+            border: 2px solid var(--border-color);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-body {
+            border: 4px solid var(--border-color);
+            background: #000;
+            padding: 25px;
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
+    <!-- FALLING RETRO SNOW CANVAS -->
     <canvas id="snowCanvas"></canvas>
 
+    <!-- CLOUD-SYNCED AUDIO ELEMENT -->
+    <audio id="bgmAudio" loop src="https://dn721605.ca.archive.org/0/items/undertaleost_202004/Undertale%20-%20Lossless%20Soundtrack%20%28toby%20fox%29/toby%20fox%20-%20UNDERTALE%20Soundtrack%20-%2068%20Death%20by%20Glamour.mp3"></audio>
+
     <div class="container">
+        <!-- HEADER -->
         <header>
             <div class="header-title-container">
-                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z2czl4cnYyaHZkMnJicXB5bnprNW8xd3dzMTRrMmE0M3Rvd3VwZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/L3X9Gv2K19P194360A/giphy.gif" alt="Save Point" class="save-star-gif" id="saveStar">
-                <h1>HELPDESK PORTAL</h1>
+                <img src="https://sans-script.github.io/undertale-savepoint/Imgs/savepoint.gif" alt="Save Point" class="save-star-gif">
+                <div>
+                    <h1>★ AI HELPDESK ROUTER</h1>
+                    <div style="color: #888; font-size: 1.1rem;">[ Enterprise Edition v2.6 ]</div>
+                </div>
             </div>
-            <div id="syncStatus" style="color: var(--accent-green);">[CLOUD SYNC ACTIVE]</div>
+            <div class="user-panel">
+                <span id="roleLabel">* Role: Guest</span>
+                
+                <button class="btn" id="bgmToggleBtn" onclick="toggleBGM()">🔊 BGM: ON</button>
+                
+                <div class="volume-control-group">
+                    <span>VOL:</span>
+                    <input type="range" id="bgmVolumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="0.95" oninput="handleVolumeChange(this.value)">
+                </div>
+
+                <button class="btn" id="loginBtn" onclick="openLoginModal()">Login</button>
+                <button class="btn btn-danger hidden" id="logoutBtn" onclick="logoutUser()">Logout</button>
+            </div>
         </header>
 
+        <!-- SYSTEM STATUS BAR -->
+        <div class="status-box">
+            <div id="aiLoadStatus">Status: Initializing WASM Engine...</div>
+            <div class="progress-bar-bg" id="progressBarBg">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+        </div>
+
+        <!-- TABS -->
         <div class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('chatTab')">AI ASSISTANT</button>
-            <button class="tab-btn" onclick="switchTab('ticketsTab')">TICKETS QUEUE</button>
-            <button class="tab-btn" onclick="switchTab('createTab')">NEW TICKET</button>
-            <button class="tab-btn" onclick="switchTab('masterTab')">MASTER CONTROLS</button>
+            <button class="tab-btn active" onclick="switchTab('chatTab', this)">💬 AI Specialist</button>
+            <button class="tab-btn" onclick="switchTab('ticketsTab', this)">🎫 Log Ticket</button>
+            <button class="tab-btn hidden" id="staffRosterTabBtn" onclick="switchTab('staffRosterTab', this)">👥 Staff Queue & Roster 🔒</button>
+            <button class="tab-btn hidden" id="masterTabBtn" onclick="switchTab('masterTab', this)">⚡ Master Controls (Gob) 🔒</button>
         </div>
 
-        <!-- CHAT TAB -->
+        <!-- TAB 1: CHAT ASSISTANT -->
         <div id="chatTab" class="tab-content active">
-            <div class="chat-box" id="chatBox">
-                <div class="chat-msg bot">Greetings. I am your Helpdesk Assistant. State your technical issue clearly.</div>
+            <div class="chat-box" id="chatWindow">
+                <div class="chat-msg bot">* Howdy! I am your AI Technical Specialist. Describe any hardware, software, or network issue step-by-step.</div>
             </div>
-            <div class="chat-input-group">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Type a message or request a ticket..." onkeypress="if(event.key==='Enter') handleChatSubmit()">
-                <button id="sendStopBtn" class="btn" onclick="handleChatSubmit()">SEND</button>
-            </div>
+            <form class="chat-input-group" id="chatForm" onsubmit="handleChatSubmit(event)">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Describe your technical issue..." autocomplete="off" required>
+                <button type="submit" id="sendBtn" class="btn">SEND</button>
+            </form>
         </div>
 
-        <!-- TICKETS LIST TAB -->
+        <!-- TAB 2: PUBLIC TICKET SUBMISSION FORM (TICKET LIST IS HIDDEN FOR GUESTS) -->
         <div id="ticketsTab" class="tab-content">
-            <div id="ticketsList"></div>
-        </div>
-
-        <!-- MANUAL CREATE TICKET TAB -->
-        <div id="createTab" class="tab-content">
-            <div class="form-group">
-                <label>USER / SENDER</label>
-                <input type="text" id="manualUser" class="form-input" placeholder="Your Name">
-            </div>
-            <div class="form-group">
-                <label>PRIORITY RANK</label>
-                <select id="manualPriority" class="form-select">
-                    <option value="HIGH">HIGH (CAN'T WAIT)</option>
-                    <option value="MEDIUM" selected>MEDIUM (STANDARD)</option>
-                    <option value="LOW">LOW (CAN WAIT)</option>
+            <h2 style="color: var(--accent-yellow); margin-bottom: 10px;">* Log Support Request</h2>
+            <p style="color: #aaa; margin-bottom: 12px; font-size: 1.1rem;">
+                Submit your incident below. An automated priority rating (P1-P4) and SLA resolution clock will be assigned based on severity.
+            </p>
+            
+            <form class="ticket-form" onsubmit="createTicket(event)">
+                <input type="text" id="ticketTitle" class="ticket-input" placeholder="Issue Title (e.g. Chromebook screen flickering on boot)" required>
+                
+                <input type="email" id="ticketEmail" class="ticket-input" placeholder="Your Email Address (for Ticket ID confirmation)" required>
+                
+                <select id="ticketCategory" class="ticket-select" required>
+                    <option value="" disabled selected>-- Select Category --</option>
+                    <option value="Hardware">💻 Hardware / Workstations</option>
+                    <option value="Software">⚡ Software / Applications</option>
+                    <option value="Network">🌐 Network / Wi-Fi / VPN</option>
+                    <option value="Account Access">🔑 Account Access / MFA</option>
                 </select>
+                
+                <textarea id="ticketDesc" class="ticket-textarea" rows="3" placeholder="Describe the problem occurring..." required></textarea>
+                <input type="text" id="ticketTried" class="ticket-input" placeholder="Solutions already tried (e.g. restarted laptop twice)">
+
+                <button type="submit" class="btn">SUBMIT TICKET</button>
+            </form>
+
+            <div style="color: #888; margin-top: 15px; border: 2px dashed #444; padding: 15px; text-align: center; font-size: 1.1rem;">
+                * [ NOTICE ]: Active tickets are kept strictly confidential and hidden from public view. You will receive an instant on-screen & email confirmation code (TKT-####) upon dispatch.
             </div>
-            <div class="form-group">
-                <label>ISSUE DESCRIPTION</label>
-                <textarea id="manualIssue" class="form-textarea" rows="4" placeholder="Describe the problem..."></textarea>
-            </div>
-            <button class="btn" onclick="submitManualTicket()">SUBMIT TICKET</button>
         </div>
 
-        <!-- MASTER CONTROLS TAB -->
+        <!-- TAB 3: STAFF QUEUE & ROSTER (RESTRICTED TO STAFF & GOB) -->
+        <div id="staffRosterTab" class="tab-content">
+            <h2 style="color: var(--accent-yellow); margin-bottom: 10px;">* Active Department Queues & SLA Timers</h2>
+            
+            <div class="ticket-list" id="ticketListContainer" style="margin-bottom: 25px;">
+                <!-- Dynamic Active Tickets -->
+            </div>
+
+            <h2 style="color: var(--accent-yellow); margin-bottom: 10px; border-top: 2px dashed #fff; padding-top: 15px;">* Authorized Staff Accounts</h2>
+            
+            <div id="addStaffSection" class="hidden" style="border: 2px solid var(--border-color); padding: 15px; margin-bottom: 20px;">
+                <h3 style="color: var(--accent-cyan); margin-bottom: 10px;">+ Register New Account (Gob Only)</h3>
+                <form onsubmit="handleAddStaff(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="newStaffUser" class="ticket-input" placeholder="Username" required style="flex: 1; min-width: 150px;">
+                    <input type="password" id="newStaffPass" class="ticket-input" placeholder="Password" required style="flex: 1; min-width: 150px;">
+                    <select id="newStaffRole" class="ticket-select" style="min-width: 120px;">
+                        <option value="STAFF">STAFF</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                    <button type="submit" class="btn">CREATE USER</button>
+                </form>
+            </div>
+
+            <div class="staff-list" id="staffListContainer">
+                <!-- Dynamic Staff List -->
+            </div>
+        </div>
+
+        <!-- TAB 4: GOB MASTER CONTROLS -->
         <div id="masterTab" class="tab-content">
-            <div class="master-panel">
-                <h3>CLOUD AUDIO & SYSTEM CONFIGURATION</h3>
-                <div class="form-group">
-                    <label>GLOBAL BGM MP3 LINK</label>
-                    <input type="text" id="masterAudioUrl" class="form-input" placeholder="https://example.com/audio.mp3">
+            <h2 style="color: var(--accent-yellow); margin-bottom: 15px;">* Super Admin Master Controls (Gob)</h2>
+            
+            <div class="control-grid">
+                <div class="control-card">
+                    <h3>Cloud Audio Sync</h3>
+                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Paste a new track URL to update background music for all visitors globally.</p>
+                    <input type="text" id="cloudTrackUrlInput" class="ticket-input" placeholder="https://domain.com/music.mp3">
+                    <button class="btn" style="margin-top: 8px; width: 100%;" onclick="updateCloudAudioTrack()">🎵 Update Cloud BGM Track</button>
                 </div>
-                <div class="form-group">
-                    <label>GLOBAL VOLUME LEVEL (<span id="volVal">50</span>%)</label>
-                    <input type="range" id="masterVolume" min="0" max="1" step="0.05" value="0.5" class="form-input" oninput="document.getElementById('volVal').innerText = Math.round(this.value * 100)">
+
+                <div class="control-card">
+                    <h3>WASM Engine Management</h3>
+                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Upload local .GGUF binaries or reload Qwen2.5 model.</p>
+                    <input type="file" id="ggufFileInput" accept=".gguf" style="display:none;" onchange="loadManualGGUF(event)">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn" onclick="document.getElementById('ggufFileInput').click()">📂 Load GGUF</button>
+                        <button class="btn btn-danger" onclick="resetToDefaultModel()">♻️ Reset Engine</button>
+                    </div>
                 </div>
-                <button class="btn" onclick="saveMasterAudioSettings()">SYNC AUDIO TO CLOUD</button>
             </div>
         </div>
     </div>
 
-    <audio id="bgmAudio" loop src="https://archive.org/download/undertaleost_202004/Undertale%20-%20Lossless%20Soundtrack%20%28toby%20fox%29/toby%20fox%20-%20UNDERTALE%20Soundtrack%20-%2068%20Death%20by%20Glamour.mp3"></audio>
+    <!-- TICKET CONFIRMATION RECEIPT MODAL -->
+    <div class="modal-overlay" id="receiptModal">
+        <div class="modal-body" style="border-color: var(--accent-cyan);">
+            <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">★ TICKET DISPATCHED!</h2>
+            <div id="receiptDetails" style="text-align: left; font-size: 1.2rem; line-height: 1.4; border: 2px solid #fff; padding: 12px; margin-bottom: 15px;"></div>
+            <p style="color: #aaa; font-size: 1rem; margin-bottom: 15px;">
+                Save your Ticket ID code. When calling or following up with IT support, provide this ID.
+            </p>
+            <button class="btn" onclick="closeReceiptModal()">ACKNOWLEDGEMENT ACCEPTED</button>
+        </div>
+    </div>
 
+    <!-- AUTHENTICATION MODAL -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-body">
+            <h2 style="color: var(--accent-yellow); margin-bottom: 15px;">* SYSTEM LOGIN</h2>
+            <form onsubmit="handleLoginSubmit(event)">
+                <input type="text" id="loginUsernameInput" class="ticket-input" placeholder="Username (e.g. 'Gob')" style="width: 100%; margin-bottom: 10px;" required>
+                <input type="password" id="loginPasswordInput" class="ticket-input" placeholder="Password" style="width: 100%; margin-bottom: 15px;" required>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button type="submit" class="btn">ENTER</button>
+                    <button type="button" class="btn btn-danger" onclick="closeLoginModal()">CANCEL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- RETRO SNOW CANVAS SCRIPT -->
+    <script>
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+        let snowflakes = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 65; i++) {
+            snowflakes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 3 + 1,
+                speed: Math.random() * 0.8 + 0.4
+            });
+        }
+
+        function drawSnow() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            for (let i = 0; i < snowflakes.length; i++) {
+                let p = snowflakes[i];
+                ctx.rect(p.x, p.y, p.size, p.size);
+            }
+            ctx.fill();
+            updateSnow();
+            requestAnimationFrame(drawSnow);
+        }
+
+        function updateSnow() {
+            for (let i = 0; i < snowflakes.length; i++) {
+                let p = snowflakes[i];
+                p.y += p.speed;
+                p.x += Math.sin(p.y * 0.03) * 0.4;
+                if (p.y > canvas.height) {
+                    snowflakes[i] = { x: Math.random() * canvas.width, y: -10, size: p.size, speed: p.speed };
+                }
+            }
+        }
+        drawSnow();
+    </script>
+
+    <!-- UI GOVERNANCE & JSONBIN CLOUD SYNC SCRIPT -->
     <script>
         const JSONBIN_CONFIG = {
             BIN_ID: '6ac684b6ffd5d1605356c326',
-            API_KEY: '$2a$10$hJLz5ET2NvIq3Fqy2oG6mefWXtKUFQr7XubSl0ak1XpUJfP50D8kW',
+            API_KEY: '\$2a\$10\$hJLz5ET2NvIq3Fqy2oG6mefWXtKUFQr7XubSl0ak1XpUJfP50D8kW',
             get URL() { return `https://api.jsonbin.io/v3/b/${this.BIN_ID}`; }
         };
 
-        const OFF_TOPIC_REFUSALS = [
-            "* That is NOT in my job description, human.",
-            "* Mettaton only pays me to fix tech issues, dork.",
-            "* You are filled with DETERMINATION... to waste my time.",
-            "* Sans is sleeping, and so is my care for non-helpdesk questions.",
-            "* ERROR: Query contains 0% tech support. Try asking about a broken computer instead.",
-            "* Sorry, my helpdesk engine only runs on computer problems."
-        ];
+        let currentUser = { role: 'guest', username: '' };
 
-        let refusalIndex = 0;
-        let isGenerating = false;
-        let activeAbortController = null;
-        let state = {
+        // INITIAL DATABASE STATE MATCHING EXACT USER SCHEMA
+        let appState = {
+            users: [
+                { username: "Gob", password: "banzaiwashere", role: "ADMIN" },
+                { username: "guest", password: "password", role: "STAFF" }
+            ],
             tickets: [],
-            config: {
-                bgmUrl: "https://archive.org/download/undertaleost_202004/Undertale%20-%20Lossless%20Soundtrack%20%28toby%20fox%29/toby%20fox%20-%20UNDERTALE%20Soundtrack%20-%2068%20Death%20by%20Glamour.mp3",
-                volume: 0.5
+            audioState: {
+                volume: 0.95,
+                bgmPlaying: true,
+                trackUrl: "https://dn721605.ca.archive.org/0/items/undertaleost_202004/Undertale%20-%20Lossless%20Soundtrack%20%28toby%20fox%29/toby%20fox%20-%20UNDERTALE%20Soundtrack%20-%2068%20Death%20by%20Glamour.mp3"
             }
         };
 
-        const audioEl = document.getElementById('bgmAudio');
-
-        // TAB SWITCHING
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
+        // AUDIO SYNTHESIZER FOR BLIPS
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTextBlip() {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(140 + Math.random() * 40, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) {}
         }
 
-        // CLOUD STORAGE SYNC
-        async function fetchCloudData() {
+        // BGM AUDIO PLAYER & CLOUD SYNC
+        function applyAudioState() {
+            const bgm = document.getElementById('bgmAudio');
+            const slider = document.getElementById('bgmVolumeSlider');
+            const btn = document.getElementById('bgmToggleBtn');
+
+            if (!bgm) return;
+
+            if (appState.audioState.trackUrl && bgm.src !== appState.audioState.trackUrl) {
+                bgm.src = appState.audioState.trackUrl;
+                bgm.load();
+            }
+
+            bgm.volume = appState.audioState.volume;
+            if (slider) slider.value = appState.audioState.volume;
+
+            if (appState.audioState.bgmPlaying) {
+                btn.innerText = "🔊 BGM: ON";
+                bgm.play().catch(() => {
+                    const unlock = () => {
+                        bgm.play().catch(e => console.log("Waiting for user interaction"));
+                        window.removeEventListener('click', unlock);
+                    };
+                    window.addEventListener('click', unlock);
+                });
+            } else {
+                btn.innerText = "🔇 BGM: OFF";
+                bgm.pause();
+            }
+        }
+
+        function toggleBGM() {
+            appState.audioState.bgmPlaying = !appState.audioState.bgmPlaying;
+            applyAudioState();
+            syncToCloud();
+        }
+
+        function handleVolumeChange(val) {
+            appState.audioState.volume = parseFloat(val);
+            applyAudioState();
+            syncToCloud();
+        }
+
+        async function updateCloudAudioTrack() {
+            if (currentUser.username !== 'Gob') return;
+            const input = document.getElementById('cloudTrackUrlInput').value.trim();
+            if (!input) return;
+
+            appState.audioState.trackUrl = input;
+            applyAudioState();
+            await syncToCloud();
+            alert("* Cloud BGM URL updated! All visitors will hear the new track.");
+        }
+
+        // JSONBIN CLOUD SYNC
+        async function syncFromCloud() {
             try {
                 const res = await fetch(JSONBIN_CONFIG.URL, {
                     headers: { 'X-Master-Key': JSONBIN_CONFIG.API_KEY }
@@ -378,16 +696,18 @@
                 if (res.ok) {
                     const data = await res.json();
                     if (data.record) {
-                        state.tickets = data.record.tickets || [];
-                        if (data.record.config) {
-                            state.config = data.record.config;
-                            applyAudioConfig();
+                        appState.users = data.record.users || appState.users;
+                        appState.tickets = data.record.tickets || [];
+                        if (data.record.audioState) {
+                            appState.audioState = data.record.audioState;
+                            applyAudioState();
                         }
                         renderTickets();
+                        renderStaffList();
                     }
                 }
             } catch (err) {
-                console.error("Fetch error:", err);
+                console.error("Cloud sync error:", err);
             }
         }
 
@@ -399,254 +719,477 @@
                         'Content-Type': 'application/json',
                         'X-Master-Key': JSONBIN_CONFIG.API_KEY
                     },
-                    body: JSON.stringify(state)
+                    body: JSON.stringify(appState)
                 });
-                renderTickets();
             } catch (err) {
-                console.error("Sync error:", err);
+                console.error("Cloud push error:", err);
             }
         }
 
-        function applyAudioConfig() {
-            if (state.config.bgmUrl && audioEl.src !== state.config.bgmUrl) {
-                audioEl.src = state.config.bgmUrl;
-            }
-            audioEl.volume = state.config.volume ?? 0.5;
-            document.getElementById('masterAudioUrl').value = state.config.bgmUrl || '';
-            document.getElementById('masterVolume').value = state.config.volume ?? 0.5;
-            document.getElementById('volVal').innerText = Math.round((state.config.volume ?? 0.5) * 100);
-            
-            // Auto play audio interaction trigger
-            audioEl.play().catch(() => {});
+        // NAVIGATION TABS
+        function switchTab(tabId, btnEl) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnEl.classList.add('active');
+            playTextBlip();
         }
 
-        async function saveMasterAudioSettings() {
-            const url = document.getElementById('masterAudioUrl').value.trim();
-            const vol = parseFloat(document.getElementById('masterVolume').value);
-            state.config = { bgmUrl: url, volume: vol };
-            applyAudioConfig();
-            await syncToCloud();
-            alert("Global audio settings synchronized to cloud!");
+        // AUTHENTICATION
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('loginUsernameInput').focus();
         }
 
-        // CHAT & AI GENERATION
-        function handleChatSubmit() {
-            if (isGenerating) {
-                if (activeAbortController) {
-                    activeAbortController.abort();
-                }
-                setGeneratingState(false);
-                appendChatMessage("bot", "* [GENERATION STOPPED BY USER]");
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUsernameInput').value.trim();
+            const pass = document.getElementById('loginPasswordInput').value.trim();
+
+            const found = appState.users.find(u => u.username.toLowerCase() === user.toLowerCase() && u.password === pass);
+            if (found) {
+                currentUser = { role: found.role === 'ADMIN' ? 'admin' : 'staff', username: found.username };
+                updateUIState();
+                closeLoginModal();
+                alert(`* Welcome back, ${found.username}!`);
                 return;
             }
 
-            const inputEl = document.getElementById('chatInput');
-            const query = inputEl.value.trim();
-            if (!query) return;
+            alert("* Access Denied: Invalid Username or Password.");
+        }
 
-            appendChatMessage("user", query);
-            inputEl.value = "";
+        function logoutUser() {
+            currentUser = { role: 'guest', username: '' };
+            updateUIState();
+            switchTab('chatTab', document.querySelectorAll('.tab-btn'));
+        }
 
-            // Check Off-Topic Guardrail
-            if (isOffTopic(query)) {
-                const refusal = OFF_TOPIC_REFUSALS[refusalIndex % OFF_TOPIC_REFUSALS.length];
-                refusalIndex++;
-                setTimeout(() => appendChatMessage("bot", refusal), 300);
+        function updateUIState() {
+            const roleLabel = document.getElementById('roleLabel');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const masterTabBtn = document.getElementById('masterTabBtn');
+            const staffRosterTabBtn = document.getElementById('staffRosterTabBtn');
+            const addStaffSection = document.getElementById('addStaffSection');
+
+            if (currentUser.username === 'Gob') {
+                roleLabel.innerText = "* Role: Super Admin (Gob)";
+                roleLabel.style.color = "var(--accent-yellow)";
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                masterTabBtn.classList.remove('hidden');
+                staffRosterTabBtn.classList.remove('hidden');
+                addStaffSection.classList.remove('hidden');
+            } else if (currentUser.role === 'staff' || currentUser.role === 'admin') {
+                roleLabel.innerText = `* Role: Staff (${currentUser.username})`;
+                roleLabel.style.color = "var(--accent-cyan)";
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                masterTabBtn.classList.add('hidden');
+                staffRosterTabBtn.classList.remove('hidden');
+                addStaffSection.classList.add('hidden');
+            } else {
+                roleLabel.innerText = "* Role: Guest";
+                roleLabel.style.color = "#fff";
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                masterTabBtn.classList.add('hidden');
+                staffRosterTabBtn.classList.add('hidden');
+                addStaffSection.classList.add('hidden');
+            }
+
+            renderTickets();
+            renderStaffList();
+        }
+
+        // ACCOUNT GOVERNANCE (GOB ONLY)
+        async function handleAddStaff(e) {
+            e.preventDefault();
+            if (currentUser.username !== 'Gob') return;
+
+            const user = document.getElementById('newStaffUser').value.trim();
+            const pass = document.getElementById('newStaffPass').value.trim();
+            const role = document.getElementById('newStaffRole').value;
+
+            if (appState.users.some(u => u.username.toLowerCase() === user.toLowerCase())) {
+                alert("* Username already exists!");
                 return;
             }
 
-            // Ticket Draft Request Detection
-            if (query.toLowerCase().includes("ticket") || query.toLowerCase().includes("create ticket") || query.toLowerCase().includes("log issue")) {
-                generateTicketDraft(query);
-                return;
-            }
-
-            // Generate Technical Support Response
-            processAIResponse(query);
-        }
-
-        function isOffTopic(text) {
-            const techKeywords = ["error", "ticket", "help", "broken", "computer", "screen", "bug", "issue", "portal", "password", "network", "login", "slow", "crash", "code", "app"];
-            const lower = text.toLowerCase();
-            return !techKeywords.some(kw => lower.includes(kw)) && text.length > 5;
-        }
-
-        function processAIResponse(userText) {
-            setGeneratingState(true);
-            activeAbortController = new AbortController();
-
-            // Simulate fast, direct AI stream
-            let responseText = getDirectSolution(userText);
-            let charIdx = 0;
-            const msgDiv = appendChatMessage("bot", "");
-
-            const interval = setInterval(() => {
-                if (activeAbortController.signal.aborted) {
-                    clearInterval(interval);
-                    return;
-                }
-                msgDiv.textContent += responseText[charIdx];
-                charIdx++;
-                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
-
-                if (charIdx >= responseText.length) {
-                    clearInterval(interval);
-                    setGeneratingState(false);
-                }
-            }, 20);
-        }
-
-        function getDirectSolution(text) {
-            const lower = text.toLowerCase();
-            if (lower.includes("password")) return "* Solution: Click 'Reset Password' on login, or contact system admin to issue a temp token. (Ask if you need step-by-step guidance).";
-            if (lower.includes("screen") || lower.includes("display")) return "* Solution: Inspect physical HDMI/DisplayPort cabling and toggle display mode using [Win + P].";
-            if (lower.includes("slow") || lower.includes("lag")) return "* Solution: Open Task Manager [Ctrl+Shift+Esc], check RAM/CPU utilization, and terminate high-resource background loops.";
-            return "* Solution: Clear browser cache, verify active network connections, and restart the service client.";
-        }
-
-        function generateTicketDraft(query) {
-            const draftHtml = `
-                <div>* Ticket draft generated based on your query:</div>
-                <div class="ticket-draft-box">
-                    <div><strong>USER:</strong> User_Session</div>
-                    <div><strong>PRIORITY:</strong> <span class="badge priority-high">HIGH (CAN'T WAIT)</span></div>
-                    <div><strong>ISSUE:</strong> ${query}</div>
-                    <button class="btn" style="margin-top: 8px;" onclick="confirmTicketDraft('${escapeQuotes(query)}', 'HIGH')">CONFIRM & SUBMIT TO CLOUD</button>
-                </div>
-            `;
-            appendChatMessage("bot", draftHtml, true);
-        }
-
-        function escapeQuotes(str) {
-            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        }
-
-        async function confirmTicketDraft(issue, priority) {
-            const newTicket = {
-                id: Date.now(),
-                user: "User_Session",
-                priority: priority,
-                issue: issue,
-                timestamp: new Date().toLocaleTimeString()
-            };
-            state.tickets.push(newTicket);
-            await syncToCloud();
-            appendChatMessage("bot", "* [SUCCESS] Ticket logged into cloud storage queue!");
-        }
-
-        async function submitManualTicket() {
-            const user = document.getElementById('manualUser').value.trim() || "Anonymous";
-            const priority = document.getElementById('manualPriority').value;
-            const issue = document.getElementById('manualIssue').value.trim();
-
-            if (!issue) {
-                alert("Please describe the issue.");
-                return;
-            }
-
-            const newTicket = {
-                id: Date.now(),
-                user: user,
-                priority: priority,
-                issue: issue,
-                timestamp: new Date().toLocaleTimeString()
-            };
-
-            state.tickets.push(newTicket);
+            appState.users.push({ username: user, password: pass, role });
             await syncToCloud();
 
-            document.getElementById('manualIssue').value = "";
-            alert("Ticket successfully submitted!");
-            switchTab('ticketsTab');
+            document.getElementById('newStaffUser').value = '';
+            document.getElementById('newStaffPass').value = '';
+            renderStaffList();
+            alert(`* Account '${user}' created and saved to cloud.`);
         }
 
-        function renderTickets() {
-            const container = document.getElementById('ticketsList');
-            if (!state.tickets.length) {
-                container.innerHTML = "<div style='color: #888;'>No active tickets in queue.</div>";
+        async function removeStaff(username) {
+            if (currentUser.username !== 'Gob') return;
+            if (username === 'Gob') return alert("* Cannot remove primary admin Gob!");
+
+            if (confirm(`* Delete user account '${username}'?`)) {
+                appState.users = appState.users.filter(u => u.username !== username);
+                await syncToCloud();
+                renderStaffList();
+            }
+        }
+
+        function renderStaffList() {
+            const container = document.getElementById('staffListContainer');
+            if (appState.users.length === 0) {
+                container.innerHTML = `<div style="color: #888;">* No registered accounts.</div>`;
                 return;
             }
 
-            container.innerHTML = state.tickets.map((t, idx) => `
-                <div class="ticket-card">
-                    <div class="ticket-header">
-                        <span>#${t.id} - ${t.user} (${t.timestamp})</span>
-                        <span class="badge priority-${t.priority.toLowerCase()}">${t.priority}</span>
+            container.innerHTML = appState.users.map(u => `
+                <div class="staff-item">
+                    <div>
+                        <strong style="color: var(--accent-cyan); font-size: 1.3rem;">👤 ${u.username}</strong>
+                        <span style="color: #888; font-size: 1rem; margin-left: 10px;">[Role: ${u.role}]</span>
                     </div>
-                    <div style="font-size: 1.2rem;">${t.issue}</div>
-                    <button class="btn btn-stop" style="margin-top: 8px; font-size: 0.9rem;" onclick="deleteTicket(${idx})">RESOLVE / DELETE</button>
+                    ${currentUser.username === 'Gob' && u.username !== 'Gob' ? `<button class="btn btn-danger" onclick="removeStaff('\${u.username}')">REMOVE</button>` : ''}
                 </div>
             `).join('');
         }
 
-        async function deleteTicket(idx) {
-            state.tickets.splice(idx, 1);
+        // AUTO-INSPECTION 4-LEVEL PRIORITY & SLA TIMER FRAMEWORK
+        function calculateTicketPriority(title, desc) {
+            const text = (title + " " + desc).toLowerCase();
+            let priority = "P3";
+            let priorityLabel = "P3 - Standard Service";
+            let badgeClass = "p3-badge";
+            let slaHours = 24; // 3 BD / 24 BH
+
+            if (text.includes("outage") || text.includes("down") || text.includes("crash") || text.includes("black") || text.includes("emergency") || text.includes("security") || text.includes("breach")) {
+                priority = "P1";
+                priorityLabel = "P1 - Critical Urgency";
+                badgeClass = "p1-badge";
+                slaHours = 8; // 1 BH Response / 8 BH Resolution
+            } else if (text.includes("vpn") || text.includes("wifi") || text.includes("slow") || text.includes("login") || text.includes("mfa") || text.includes("pay")) {
+                priority = "P2";
+                priorityLabel = "P2 - High Priority";
+                badgeClass = "p2-badge";
+                slaHours = 16; // 4 BH Response / 2 BD
+            } else if (text.includes("minor") || text.includes("question") || text.includes("info") || text.includes("fyi")) {
+                priority = "P4";
+                priorityLabel = "P4 - Low Priority";
+                badgeClass = "p4-badge";
+                slaHours = 40; // 5 BD
+            }
+
+            return {
+                priority,
+                priorityLabel,
+                badgeClass,
+                slaDue: Date.now() + (slaHours * 60 * 60 * 1000)
+            };
+        }
+
+        // TICKET SUBMISSION (WITH EMAIL & TKT-#### CONFIRMATION)
+        async function createTicket(e) {
+            if (e) e.preventDefault();
+            const title = document.getElementById('ticketTitle').value.trim();
+            const email = document.getElementById('ticketEmail').value.trim();
+            const category = document.getElementById('ticketCategory').value;
+            const desc = document.getElementById('ticketDesc').value.trim();
+            const tried = document.getElementById('ticketTried').value.trim() || "Basic reboot";
+
+            if (!title || !email || !category || !desc) return;
+
+            const tktNum = "TKT-" + Math.floor(1000 + Math.random() * 9000);
+            const prioData = calculateTicketPriority(title, desc);
+
+            const newTicket = { 
+                id: Date.now(), 
+                tktNum: tktNum,
+                title: title, 
+                email: email,
+                category: category, 
+                desc: desc, 
+                tried: tried,
+                priority: prioData.priority,
+                priorityLabel: prioData.priorityLabel,
+                badgeClass: prioData.badgeClass,
+                slaDue: prioData.slaDue,
+                status: 'OPEN',
+                createdBy: currentUser.username || 'Guest'
+            };
+
+            appState.tickets.unshift(newTicket);
             await syncToCloud();
+
+            // Open Receipt Modal for User
+            showReceiptModal(newTicket);
+
+            document.getElementById('ticketTitle').value = '';
+            document.getElementById('ticketEmail').value = '';
+            document.getElementById('ticketCategory').value = '';
+            document.getElementById('ticketDesc').value = '';
+            document.getElementById('ticketTried').value = '';
+
+            renderTickets();
+            playTextBlip();
         }
 
-        function setGeneratingState(generating) {
-            isGenerating = generating;
-            const btn = document.getElementById('sendStopBtn');
-            if (generating) {
-                btn.innerText = "STOP";
-                btn.classList.add('btn-stop');
-            } else {
-                btn.innerText = "SEND";
-                btn.classList.remove('btn-stop');
-                activeAbortController = null;
+        function showReceiptModal(tkt) {
+            const container = document.getElementById('receiptDetails');
+            container.innerHTML = `
+                <strong>Ticket ID:</strong> <span style="color: var(--accent-yellow);">${tkt.tktNum}</span><br>
+                <strong>Priority:</strong> <span class="${tkt.badgeClass}">${tkt.priorityLabel}</span><br>
+                <strong>Category:</strong> ${tkt.category}<br>
+                <strong>Confirmation Email Sent To:</strong> ${tkt.email}<br>
+                <strong>SLA Resolution Target:</strong> ${new Date(tkt.slaDue).toLocaleString()}
+            `;
+            document.getElementById('receiptModal').style.display = 'flex';
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receiptModal').style.display = 'none';
+        }
+
+        async function deleteTicket(id) {
+            if (!confirm("* Mark ticket as resolved / remove from queue?")) return;
+            appState.tickets = appState.tickets.filter(t => t.id !== id);
+            await syncToCloud();
+            renderTickets();
+        }
+
+        function renderTickets() {
+            const container = document.getElementById('ticketListContainer');
+            if (appState.tickets.length === 0) {
+                container.innerHTML = `<div style="color: #888; padding: 10px;">* Active ticket queue is currently empty.</div>`;
+                return;
+            }
+
+            container.innerHTML = appState.tickets.map(t => {
+                const diff = t.slaDue - Date.now();
+                let timerStr = "Breached!";
+                if (diff > 0) {
+                    const hrs = Math.floor(diff / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    timerStr = `${hrs}h ${mins}m remaining`;
+                }
+
+                return `
+                    <div class="ticket-item">
+                        <div style="flex: 1;">
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                                <strong style="color: var(--accent-yellow); font-size: 1.3rem;">[${t.tktNum}] ${t.title}</strong>
+                                <span class="${t.badgeClass}">${t.priorityLabel}</span>
+                            </div>
+                            <p style="color: #ccc; margin-bottom: 6px;">${t.desc}</p>
+                            <div style="font-size: 1rem; color: #aaa;">
+                                <strong>Tried Previously:</strong> ${t.tried}<br>
+                                <strong>Contact:</strong> ${t.email} | <strong>Category:</strong> ${t.category}
+                            </div>
+                            <div style="font-size: 0.95rem; color: var(--accent-cyan); margin-top: 6px;">
+                                ⏳ SLA Target: ${timerStr}
+                            </div>
+                        </div>
+                        <button class="btn btn-danger" onclick="deleteTicket(${t.id})">RESOLVE</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Live SLA Timer Refresh
+        setInterval(renderTickets, 30000);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            syncFromCloud();
+            updateUIState();
+            setInterval(syncFromCloud, 4000); // Polling loop
+        });
+    </script>
+
+    <!-- WLLAMA WASM LOCAL LLM ENGINE + COMBINED SEND/STOP GENERATION BUTTON -->
+    <script type="module">
+        import { Wllama } from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/index.js';
+        import WasmFromCDN from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/wasm-from-cdn.js';
+
+        let wllamaInstance = null;
+        let isModelLoaded = false;
+        let isGenerating = false;
+        let abortGeneration = false;
+
+        // CYCLING UNDERTALE REFUSAL DIALOGUE
+        const REFUSAL_DIALOGUES = [
+            "* Flowey: Howdy! In this portal, it's TROUBLESHOOT or BE TROUBLESHOOTED! Stick to IT support questions!",
+            "* Sans: geez kid... i'm on break. ask me a computer or hardware question.",
+            "* Papyrus: NYEH HEH HEH! THAT IS NOT AN IT HELPDESK QUESTION! ASK ABOUT HARDWARE OR NETWORK ERRORS!",
+            "* Toriel: My child, please ask a question regarding your computer, console, or software issue so we may help you.",
+            "* Undyne: NGAAAAAH! THAT'S NOT A HELPDESK TICKET! ASK AN ACTUAL TECHNICAL QUESTION!"
+        ];
+        let refusalIndex = 0;
+
+        function isOffTopicQuery(text) {
+            const t = text.toLowerCase();
+            const techKeywords = ["computer", "pc", "chromebook", "windows", "mac", "xbox", "ps5", "playstation", "switch", "wifi", "network", "internet", "vpn", "crash", "black", "screen", "error", "login", "password", "mfa", "app", "software", "hardware", "outage", "bug", "boot", "freeze", "slow", "driver"];
+            return !techKeywords.some(kw => t.includes(text.length < 5 ? 'xyz' : kw));
+        }
+
+        async function initWllama() {
+            if (!wllamaInstance) {
+                updateAIStatus("Initializing WebAssembly worker...", "#ffff55");
+                wllamaInstance = new Wllama(WasmFromCDN);
+            }
+            return wllamaInstance;
+        }
+
+        const DEFAULT_MODEL_CONFIG = {
+            type: 'hf',
+            repo: 'Qwen/Qwen2.5-0.5B-Instruct-GGUF',
+            file: 'qwen2.5-0.5b-instruct-q4_k_m.gguf'
+        };
+
+        async function bootActiveModel() {
+            showProgressBar(true);
+            try {
+                const wllama = await initWllama();
+                updateAIStatus(`Connecting to AI Repository (${DEFAULT_MODEL_CONFIG.file})...`, "#ffff55");
+                await wllama.loadModelFromHF(
+                    DEFAULT_MODEL_CONFIG.repo,
+                    DEFAULT_MODEL_CONFIG.file,
+                    {
+                        n_ctx: 2048,
+                        progressCallback: ({ loaded, total }) => {
+                            const pct = Math.round((loaded / total) * 100);
+                            setProgressBar(pct);
+                            updateAIStatus(`Streaming AI Engine: ${pct}%`, "#ffff55");
+                        }
+                    }
+                );
+                isModelLoaded = true;
+                updateAIStatus("✓ Qwen 2.5 Local AI Engine Active", "var(--accent-green)");
+                showProgressBar(false);
+            } catch (err) {
+                updateAIStatus(`❌ AI Engine Offline (Running Offline Fallback)`, "#ff5555");
+                showProgressBar(false);
             }
         }
 
-        function appendChatMessage(role, text, isHtml = false) {
-            const chatBox = document.getElementById('chatBox');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `chat-msg ${role}`;
-            if (isHtml) {
-                msgDiv.innerHTML = text;
-            } else {
-                msgDiv.textContent = text;
+        // STRICT CONCISE CHAT HANDLER & DYNAMIC SEND/STOP BUTTON
+        window.handleChatSubmit = async function(e) {
+            if (e) e.preventDefault();
+            const inputEl = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendBtn');
+
+            // IF ALREADY GENERATING -> STOP IMMEDIATELY
+            if (isGenerating) {
+                abortGeneration = true;
+                return;
             }
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            return msgDiv;
+
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            const chatWindow = document.getElementById('chatWindow');
+
+            // Render User Query
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-msg user';
+            userMsg.innerText = query;
+            chatWindow.appendChild(userMsg);
+
+            inputEl.value = "";
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            // CHECK OFF-TOPIC INTENT -> TRIGGER UNDERTALE REFUSAL
+            if (isOffTopicQuery(query)) {
+                const refusalMsg = document.createElement('div');
+                refusalMsg.className = 'chat-msg bot';
+                refusalMsg.innerText = REFUSAL_DIALOGUES[refusalIndex % REFUSAL_DIALOGUES.length];
+                refusalIndex++;
+                chatWindow.appendChild(refusalMsg);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                if (typeof playTextBlip === 'function') playTextBlip();
+                return;
+            }
+
+            // Render Bot Stream Box
+            const botMsg = document.createElement('div');
+            botMsg.className = 'chat-msg bot';
+            botMsg.innerText = "* [AI Specialist reasoning...]";
+            chatWindow.appendChild(botMsg);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            // Dynamic Send/Stop UI State
+            isGenerating = true;
+            abortGeneration = false;
+            sendBtn.innerText = "STOP [X]";
+            sendBtn.classList.add("btn-stop");
+
+            if (!isModelLoaded || !wllamaInstance) {
+                setTimeout(() => {
+                    botMsg.innerText = "* [AI IT Specialist]: For " + query + ", try checking your power connection, performing a hard refresh, or verifying network cable connection. If unresolved, click Log Ticket above!";
+                    resetSendButton();
+                }, 400);
+                return;
+            }
+
+            try {
+                const systemInstructions = `You are a concise AI IT Support Specialist. Give short, direct, step-by-step solutions under 3 sentences. Do not offer lengthy explanations unless requested.`;
+                const formattedPrompt = `<|im_start|>system\n${systemInstructions}<|im_end|>\n<|im_start|>user\n${query}<|im_end|>\n<|im_start|>assistant\n`;
+
+                await wllamaInstance.createCompletion(formattedPrompt, {
+                    nPredict: 300,
+                    temp: 0.3,
+                    penalty_repeat: 1.2,
+                    onNewToken: (token, piece, currentText) => {
+                        if (abortGeneration) {
+                            throw new Error("GENERATION_CANCELLED");
+                        }
+                        botMsg.innerText = "* [AI IT Specialist]:\n" + currentText;
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                        if (typeof playTextBlip === 'function') playTextBlip();
+                    }
+                });
+            } catch (err) {
+                if (err.message === "GENERATION_CANCELLED") {
+                    botMsg.innerText += "\n\n* [ Generation Stopped by User ]";
+                } else {
+                    botMsg.innerText = `* [AI IT Specialist]: Step 1: Reboot device. Step 2: Clear cache & re-plug cables. If unresolved, submit a formal ticket.`;
+                }
+            }
+
+            resetSendButton();
+        };
+
+        function resetSendButton() {
+            const sendBtn = document.getElementById('sendBtn');
+            isGenerating = false;
+            abortGeneration = false;
+            sendBtn.innerText = "SEND";
+            sendBtn.classList.remove("btn-stop");
         }
 
-        // SNOW ANIMATION EFFECT
-        const canvas = document.getElementById('snowCanvas');
-        const ctx = canvas.getContext('2d');
-        let flakes = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        for (let i = 0; i < 50; i++) {
-            flakes.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                size: Math.random() * 3 + 2,
-                speed: Math.random() * 1 + 0.5
-            });
+        function updateAIStatus(msg, color) {
+            const el = document.getElementById('aiLoadStatus');
+            if (el) {
+                el.innerText = `Status: ${msg}`;
+                el.style.color = color;
+            }
         }
 
-        function drawSnow() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#ffffff";
-            flakes.forEach(f => {
-                ctx.fillRect(f.x, f.y, f.size, f.size);
-                f.y += f.speed;
-                if (f.y > canvas.height) f.y = 0;
-            });
-            requestAnimationFrame(drawSnow);
+        function showProgressBar(show) {
+            const el = document.getElementById('progressBarBg');
+            if (el) el.style.display = show ? 'block' : 'none';
         }
-        drawSnow();
 
-        // INIT LOAD
-        document.addEventListener('click', () => audioEl.play().catch(() => {}), { once: true });
-        fetchCloudData();
+        function setProgressBar(pct) {
+            const el = document.getElementById('progressBarFill');
+            if (el) el.style.width = `${pct}%`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            bootActiveModel();
+        });
     </script>
 </body>
 </html>
