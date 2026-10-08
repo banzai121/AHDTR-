@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Determination Helpdesk Ticket Router</title>
-    <!-- Undertale Monospace Monospaced Typography -->
+    <title>Automaked Helpdesk Ticket Router</title>
+    <!-- Undertale Monospace Typography -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <style>
         :root {
@@ -242,12 +242,25 @@
             border-color: var(--accent-yellow);
         }
 
-        /* STATUS BOX */
+        /* STATUS BOX & 15-MIN TIMER */
         .status-box {
             border: 2px dashed var(--border-color);
             padding: 12px;
             margin-bottom: 15px;
             font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sla-session-timer {
+            color: var(--accent-yellow);
+            font-weight: bold;
+            border: 1px solid var(--accent-yellow);
+            padding: 2px 8px;
+            background-color: #111;
         }
 
         .progress-bar-bg {
@@ -395,6 +408,7 @@
                 
                 <button class="btn" id="bgmToggleBtn" onclick="toggleBGM()">🔊 BGM: ON</button>
                 
+                <!-- Gob-Only Volume Control -->
                 <div class="volume-control-group">
                     <span>VOL:</span>
                     <input type="range" id="bgmVolumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="0.95" oninput="handleVolumeChange(this.value)">
@@ -405,9 +419,10 @@
             </div>
         </header>
 
-        <!-- SYSTEM STATUS BAR -->
+        <!-- SYSTEM STATUS BAR & 15-MINUTE CHAT SLA TIMER -->
         <div class="status-box">
             <div id="aiLoadStatus">Status: Initializing WASM Engine...</div>
+            <div class="sla-session-timer" id="sessionSlaTimerDisplay">⏱️ AI Window: 15:00</div>
             <div class="progress-bar-bg" id="progressBarBg">
                 <div class="progress-bar-fill" id="progressBarFill"></div>
             </div>
@@ -424,15 +439,15 @@
         <!-- TAB 1: CHAT ASSISTANT -->
         <div id="chatTab" class="tab-content active">
             <div class="chat-box" id="chatWindow">
-                <div class="chat-msg bot">* Howdy! I am your AI Technical Specialist. Describe any hardware, software, or network issue step-by-step.</div>
+                <div class="chat-msg bot">* Howdy! I am your AI Technical Specialist. Describe any hardware, software, or network issue step-by-step.<br>* (Note: You have a 15-minute self-service window. If unresolved, your ticket will automatically route to human IT staff!)</div>
             </div>
             <form class="chat-input-group" id="chatForm" onsubmit="handleChatSubmit(event)">
-                <input type="text" id="chatInput" class="chat-input" placeholder="Describe your technical issue..." autocomplete="off" required>
+                <input type="text" id="chatInput" class="chat-input" placeholder="Describe issue or type 'submit ticket'..." autocomplete="off" required>
                 <button type="submit" id="sendBtn" class="btn">SEND</button>
             </form>
         </div>
 
-        <!-- TAB 2: PUBLIC TICKET SUBMISSION FORM (TICKET LIST IS HIDDEN FOR GUESTS) -->
+        <!-- TAB 2: PUBLIC TICKET SUBMISSION FORM -->
         <div id="ticketsTab" class="tab-content">
             <h2 style="color: var(--accent-yellow); margin-bottom: 10px;">* Log Support Request</h2>
             <p style="color: #aaa; margin-bottom: 12px; font-size: 1.1rem;">
@@ -498,7 +513,7 @@
             <div class="control-grid">
                 <div class="control-card">
                     <h3>Cloud Audio Sync</h3>
-                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Paste a new track URL to update background music for all visitors globally.</p>
+                    <p style="font-size: 1.1rem; color: #ccc; margin-bottom: 10px;">Paste a new track URL or adjust global volume for all visitors.</p>
                     <input type="text" id="cloudTrackUrlInput" class="ticket-input" placeholder="https://domain.com/music.mp3">
                     <button class="btn" style="margin-top: 8px; width: 100%;" onclick="updateCloudAudioTrack()">🎵 Update Cloud BGM Track</button>
                 </div>
@@ -601,7 +616,6 @@
 
         let currentUser = { role: 'guest', username: '' };
 
-        // INITIAL DATABASE STATE MATCHING EXACT USER SCHEMA
         let appState = {
             users: [
                 { username: "Gob", password: "banzaiwashere", role: "ADMIN" },
@@ -633,7 +647,7 @@
             } catch(e) {}
         }
 
-        // BGM AUDIO PLAYER & CLOUD SYNC
+        // BGM AUDIO PLAYER & GOB-EXCLUSIVE VOLUME CONTROL
         function applyAudioState() {
             const bgm = document.getElementById('bgmAudio');
             const slider = document.getElementById('bgmVolumeSlider');
@@ -665,12 +679,19 @@
         }
 
         function toggleBGM() {
+            playTextBlip();
             appState.audioState.bgmPlaying = !appState.audioState.bgmPlaying;
             applyAudioState();
             syncToCloud();
         }
 
+        // RESTRICT VOLUME SLIDER EXCLUSIVELY TO GOB
         function handleVolumeChange(val) {
+            if (currentUser.username !== 'Gob') {
+                alert("* PERMISSION ERROR: Only Super Admin 'Gob' can modify global audio volume settings.");
+                document.getElementById('bgmVolumeSlider').value = appState.audioState.volume;
+                return;
+            }
             appState.audioState.volume = parseFloat(val);
             applyAudioState();
             syncToCloud();
@@ -737,16 +758,19 @@
 
         // AUTHENTICATION
         function openLoginModal() {
+            playTextBlip();
             document.getElementById('loginModal').style.display = 'flex';
             document.getElementById('loginUsernameInput').focus();
         }
 
         function closeLoginModal() {
+            playTextBlip();
             document.getElementById('loginModal').style.display = 'none';
         }
 
         function handleLoginSubmit(e) {
             e.preventDefault();
+            playTextBlip();
             const user = document.getElementById('loginUsernameInput').value.trim();
             const pass = document.getElementById('loginPasswordInput').value.trim();
 
@@ -763,6 +787,7 @@
         }
 
         function logoutUser() {
+            playTextBlip();
             currentUser = { role: 'guest', username: '' };
             updateUIState();
             switchTab('chatTab', document.querySelectorAll('.tab-btn'));
@@ -892,13 +917,24 @@
         }
 
         // TICKET SUBMISSION (WITH EMAIL & TKT-#### CONFIRMATION)
-        async function createTicket(e) {
+        async function createTicket(e, autoData = null) {
             if (e) e.preventDefault();
-            const title = document.getElementById('ticketTitle').value.trim();
-            const email = document.getElementById('ticketEmail').value.trim();
-            const category = document.getElementById('ticketCategory').value;
-            const desc = document.getElementById('ticketDesc').value.trim();
-            const tried = document.getElementById('ticketTried').value.trim() || "Basic reboot";
+            
+            let title, email, category, desc, tried;
+
+            if (autoData) {
+                title = autoData.title;
+                email = autoData.email;
+                category = autoData.category;
+                desc = autoData.desc;
+                tried = autoData.tried;
+            } else {
+                title = document.getElementById('ticketTitle').value.trim();
+                email = document.getElementById('ticketEmail').value.trim();
+                category = document.getElementById('ticketCategory').value;
+                desc = document.getElementById('ticketDesc').value.trim();
+                tried = document.getElementById('ticketTried').value.trim() || "Basic reboot";
+            }
 
             if (!title || !email || !category || !desc) return;
 
@@ -927,11 +963,13 @@
             // Open Receipt Modal for User
             showReceiptModal(newTicket);
 
-            document.getElementById('ticketTitle').value = '';
-            document.getElementById('ticketEmail').value = '';
-            document.getElementById('ticketCategory').value = '';
-            document.getElementById('ticketDesc').value = '';
-            document.getElementById('ticketTried').value = '';
+            if (!autoData) {
+                document.getElementById('ticketTitle').value = '';
+                document.getElementById('ticketEmail').value = '';
+                document.getElementById('ticketCategory').value = '';
+                document.getElementById('ticketDesc').value = '';
+                document.getElementById('ticketTried').value = '';
+            }
 
             renderTickets();
             playTextBlip();
@@ -950,10 +988,12 @@
         }
 
         function closeReceiptModal() {
+            playTextBlip();
             document.getElementById('receiptModal').style.display = 'none';
         }
 
         async function deleteTicket(id) {
+            playTextBlip();
             if (!confirm("* Mark ticket as resolved / remove from queue?")) return;
             appState.tickets = appState.tickets.filter(t => t.id !== id);
             await syncToCloud();
@@ -1004,11 +1044,11 @@
         window.addEventListener('DOMContentLoaded', () => {
             syncFromCloud();
             updateUIState();
-            setInterval(syncFromCloud, 4000); // Polling loop
+            setInterval(syncFromCloud, 4000);
         });
     </script>
 
-    <!-- WLLAMA WASM LOCAL LLM ENGINE + COMBINED SEND/STOP GENERATION BUTTON -->
+    <!-- WLLAMA WASM LOCAL LLM ENGINE + 15-MINUTE CHAT SLA & TICKET ESCALATION -->
     <script type="module">
         import { Wllama } from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/index.js';
         import WasmFromCDN from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.1.1/esm/wasm-from-cdn.js';
@@ -1017,6 +1057,12 @@
         let isModelLoaded = false;
         let isGenerating = false;
         let abortGeneration = false;
+
+        // 15-MINUTE CHAT SLA TIMER TRACKING
+        let chatStartTime = null;
+        let timerInterval = null;
+        let chatTranscript = [];
+        let autoEscalated = false;
 
         // CYCLING UNDERTALE REFUSAL DIALOGUE
         const REFUSAL_DIALOGUES = [
@@ -1028,10 +1074,76 @@
         ];
         let refusalIndex = 0;
 
+        // ALLOW GREETINGS ("hi", "hello", "hey") AND TICKET COMMANDS
         function isOffTopicQuery(text) {
+            const t = text.toLowerCase().trim();
+            const greetings = ["hi", "hello", "hey", "greetings", "howdy", "good morning", "good afternoon", "thanks", "thank you", "help", "support"];
+            if (greetings.includes(t) || greetings.some(g => t.startsWith(g + " ") || t.endsWith(" " + g))) {
+                return false;
+            }
+
+            const techKeywords = ["computer", "pc", "chromebook", "windows", "mac", "xbox", "ps5", "playstation", "switch", "wifi", "network", "internet", "vpn", "crash", "black", "screen", "error", "login", "password", "mfa", "app", "software", "hardware", "outage", "bug", "boot", "freeze", "slow", "driver", "ticket", "human", "escalate", "agent"];
+            return !techKeywords.some(kw => t.includes(kw));
+        }
+
+        function isExplicitTicketRequest(text) {
             const t = text.toLowerCase();
-            const techKeywords = ["computer", "pc", "chromebook", "windows", "mac", "xbox", "ps5", "playstation", "switch", "wifi", "network", "internet", "vpn", "crash", "black", "screen", "error", "login", "password", "mfa", "app", "software", "hardware", "outage", "bug", "boot", "freeze", "slow", "driver"];
-            return !techKeywords.some(kw => t.includes(text.length < 5 ? 'xyz' : kw));
+            return t.includes("submit ticket") || t.includes("create ticket") || t.includes("human") || t.includes("talk to support") || t.includes("escalate");
+        }
+
+        // START 15-MINUTE CHAT SESSION TIMER
+        function startChatSlaTimer() {
+            if (chatStartTime) return;
+            chatStartTime = Date.now();
+
+            timerInterval = setInterval(() => {
+                const elapsedSeconds = Math.floor((Date.now() - chatStartTime) / 1000);
+                const remainingSeconds = 900 - elapsedSeconds; // 15 minutes = 900s
+
+                const displayEl = document.getElementById('sessionSlaTimerDisplay');
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    if (displayEl) displayEl.innerText = "⏱️ AI Window: EXPIRED (Auto-Routing)";
+                    if (!autoEscalated) triggerAutoTicketEscalation("15-Minute SLA Time Exceeded");
+                } else {
+                    const mins = Math.floor(remainingSeconds / 60);
+                    const secs = remainingSeconds % 60;
+                    const formatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                    if (displayEl) displayEl.innerText = `⏱️ AI Window: ${formatted}`;
+                }
+            }, 1000);
+        }
+
+        // TRIGGER AUTOMATIC TICKET ESCALATION
+        function triggerAutoTicketEscalation(reason = "User Requested Escalation") {
+            autoEscalated = true;
+            const chatWindow = document.getElementById('chatWindow');
+
+            const summaryDesc = chatTranscript.length > 0 
+                ? chatTranscript.join(" | ") 
+                : "User initiated chat session that required escalation to human IT support staff.";
+
+            const firstUserQuery = chatTranscript.find(t => t.startsWith("User: ")) || "Auto-Escalated Chat Support Request";
+
+            const autoTicket = {
+                title: `[Escalated] ${firstUserQuery.replace("User: ", "").substring(0, 45)}...`,
+                email: "chat.user@helpdesk.local",
+                category: "Hardware",
+                desc: `[Reason: ${reason}]\n\nTranscript History:\n${summaryDesc}`,
+                tried: "Attempted 15-minute AI Specialist Chat self-service"
+            };
+
+            if (typeof window.createTicket === 'function') {
+                window.createTicket(null, autoTicket);
+            }
+
+            const alertBox = document.createElement('div');
+            alertBox.className = 'chat-msg bot';
+            alertBox.style.borderColor = 'var(--accent-cyan)';
+            alertBox.innerText = `* [SYSTEM ALERT]: Your 15-minute self-service window has concluded or escalation was requested.\n* A formal ticket has been automatically generated and assigned to human IT staff for review. Check your receipt code above!`;
+            chatWindow.appendChild(alertBox);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
         async function initWllama() {
@@ -1052,12 +1164,17 @@
             showProgressBar(true);
             try {
                 const wllama = await initWllama();
-                updateAIStatus(`Connecting to AI Repository (${DEFAULT_MODEL_CONFIG.file})...`, "#ffff55");
+                updateAIStatus(`Connecting to AI Engine...`, "#ffff55");
+
+                // SPEED OPTIMIZATION 1: Multi-Core CPU Threading (up to 4 cores)
+                const threads = Math.min(4, navigator.hardwareConcurrency || 4);
+
                 await wllama.loadModelFromHF(
                     DEFAULT_MODEL_CONFIG.repo,
                     DEFAULT_MODEL_CONFIG.file,
                     {
-                        n_ctx: 2048,
+                        n_ctx: 1024,        // SPEED OPTIMIZATION 2: Reduced context memory
+                        n_threads: threads, // Multi-threaded WASM inference
                         progressCallback: ({ loaded, total }) => {
                             const pct = Math.round((loaded / total) * 100);
                             setProgressBar(pct);
@@ -1066,15 +1183,15 @@
                     }
                 );
                 isModelLoaded = true;
-                updateAIStatus("✓ Qwen 2.5 Local AI Engine Active", "var(--accent-green)");
+                updateAIStatus("✓ Qwen 2.5 High-Speed Engine Active", "var(--accent-green)");
                 showProgressBar(false);
             } catch (err) {
-                updateAIStatus(`❌ AI Engine Offline (Running Offline Fallback)`, "#ff5555");
+                updateAIStatus(`❌ AI Engine Offline (Running Local Fallback)`, "#ff5555");
                 showProgressBar(false);
             }
         }
 
-        // STRICT CONCISE CHAT HANDLER & DYNAMIC SEND/STOP BUTTON
+        // HIGH-SPEED CHAT HANDLER WITH GREETING & TICKET DISPATCH
         window.handleChatSubmit = async function(e) {
             if (e) e.preventDefault();
             const inputEl = document.getElementById('chatInput');
@@ -1089,6 +1206,9 @@
             const query = inputEl.value.trim();
             if (!query) return;
 
+            // Start 15-Minute SLA Timer on First Chat Input
+            startChatSlaTimer();
+
             const chatWindow = document.getElementById('chatWindow');
 
             // Render User Query
@@ -1099,6 +1219,14 @@
 
             inputEl.value = "";
             chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            chatTranscript.push(`User: ${query}`);
+
+            // CHECK EXPLICIT TICKET CREATION REQUEST
+            if (isExplicitTicketRequest(query)) {
+                triggerAutoTicketEscalation("Direct User Request in Chat");
+                return;
+            }
 
             // CHECK OFF-TOPIC INTENT -> TRIGGER UNDERTALE REFUSAL
             if (isOffTopicQuery(query)) {
@@ -1125,36 +1253,51 @@
             sendBtn.innerText = "STOP [X]";
             sendBtn.classList.add("btn-stop");
 
+            // Play blip ONCE at start of submission
+            if (typeof playTextBlip === 'function') playTextBlip();
+
             if (!isModelLoaded || !wllamaInstance) {
                 setTimeout(() => {
-                    botMsg.innerText = "* [AI IT Specialist]: For " + query + ", try checking your power connection, performing a hard refresh, or verifying network cable connection. If unresolved, click Log Ticket above!";
+                    const fallbackReply = "Greetings! For " + query + ", try checking your power cables, performing a hard refresh, or verifying network connections. If unresolved, type 'submit ticket' to escalate!";
+                    botMsg.innerText = "* [AI IT Specialist]: " + fallbackReply;
+                    chatTranscript.push(`Bot: ${fallbackReply}`);
                     resetSendButton();
-                }, 400);
+                }, 200);
                 return;
             }
 
             try {
-                const systemInstructions = `You are a concise AI IT Support Specialist. Give short, direct, step-by-step solutions under 3 sentences. Do not offer lengthy explanations unless requested.`;
+                const systemInstructions = `You are a concise, friendly AI IT Support Specialist. Respond warmly to greetings ('Hi', 'Hello'). Provide short, direct 1-2 sentence troubleshooting steps under 45 words. If an issue is complex, advise the user to type 'submit ticket'.`;
                 const formattedPrompt = `<|im_start|>system\n${systemInstructions}<|im_end|>\n<|im_start|>user\n${query}<|im_end|>\n<|im_start|>assistant\n`;
 
+                let tokenCount = 0;
+
                 await wllamaInstance.createCompletion(formattedPrompt, {
-                    nPredict: 300,
-                    temp: 0.3,
-                    penalty_repeat: 1.2,
+                    nPredict: 100,      // SPEED OPTIMIZATION 3: Cap max tokens to 100
+                    temp: 0.2,          // Low temperature for direct sampling
+                    penalty_repeat: 1.1,
                     onNewToken: (token, piece, currentText) => {
                         if (abortGeneration) {
                             throw new Error("GENERATION_CANCELLED");
                         }
+                        
+                        // SPEED OPTIMIZATION 4: Update text WITHOUT playTextBlip() per token
                         botMsg.innerText = "* [AI IT Specialist]:\n" + currentText;
-                        chatWindow.scrollTop = chatWindow.scrollHeight;
-                        if (typeof playTextBlip === 'function') playTextBlip();
+                        
+                        // SPEED OPTIMIZATION 5: Throttle scroll re-renders to every 4 tokens
+                        tokenCount++;
+                        if (tokenCount % 4 === 0) {
+                            chatWindow.scrollTop = chatWindow.scrollHeight;
+                        }
                     }
                 });
+
+                chatTranscript.push(`Bot: ${botMsg.innerText}`);
             } catch (err) {
                 if (err.message === "GENERATION_CANCELLED") {
                     botMsg.innerText += "\n\n* [ Generation Stopped by User ]";
                 } else {
-                    botMsg.innerText = `* [AI IT Specialist]: Step 1: Reboot device. Step 2: Clear cache & re-plug cables. If unresolved, submit a formal ticket.`;
+                    botMsg.innerText = `* [AI IT Specialist]: Step 1: Power cycle device. Step 2: Clear browser cache. If unresolved, type 'submit ticket' to escalate to human staff.`;
                 }
             }
 
