@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI HELPDESK PORTAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --border-color: #ffffff;
+            --text-color: #ffffff;
+            --accent-yellow: #ffff55;
+            --accent-green: #55ff55;
+            --accent-red: #ff5555;
+            --accent-cyan: #55ffff;
+            --accent-purple: #ff55ff;
+            --font-family: 'VT323', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #snowCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            border: 4px solid var(--border-color);
+            padding: 20px;
+            background-color: #000;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            border-bottom: 4px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .save-star-gif {
+            width: 32px;
+            height: 32px;
+            image-rendering: pixelated;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--accent-yellow);
+            text-shadow: 2px 2px #555;
+            letter-spacing: 2px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: #888;
+            border: 2px solid #888;
+            padding: 6px 14px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-yellow);
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 8px var(--accent-yellow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .chat-box {
+            border: 2px solid var(--border-color);
+            height: 380px;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #050505;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-msg {
+            max-width: 85%;
+            padding: 10px 14px;
+            border: 2px solid #fff;
+            font-size: 1.2rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .chat-msg.user {
+            align-self: flex-end;
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .chat-msg.bot {
+            align-self: flex-start;
+            border-color: var(--accent-yellow);
+            color: #fff;
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #000;
+            border: 2px solid var(--border-color);
+            color: #fff;
+            padding: 10px;
+            font-size: 1.3rem;
+            outline: none;
+        }
+
+        .btn {
+            background: #000;
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 6px 14px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn-stop {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .btn-stop:hover {
+            background: var(--accent-red);
+            color: #000;
+        }
+
+        .ticket-card {
+            border: 2px solid var(--border-color);
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #111;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            color: var(--accent-yellow);
+            margin-bottom: 6px;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            font-size: 0.9rem;
+            border: 1px solid currentColor;
+            display: inline-block;
+        }
+
+        .priority-high { color: var(--accent-red); }
+        .priority-medium { color: var(--accent-yellow); }
+        .priority-low { color: var(--accent-green); }
+
+        .ticket-draft-box {
+            border: 2px dashed var(--accent-yellow);
+            background: #1a1a00;
+            padding: 10px;
+            margin-top: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--accent-yellow);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            background: #000;
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 8px;
+            font-size: 1.1rem;
+        }
+
+        .master-panel {
+            border: 2px dashed var(--accent-purple);
+            padding: 15px;
+            margin-top: 15px;
+            background: #0a000a;
+        }
+
+        .master-panel h3 {
+            color: var(--accent-purple);
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="snowCanvas"></canvas>
+
+    <div class="container">
+        <header>
+            <div class="header-title-container">
+                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z2czl4cnYyaHZkMnJicXB5bnprNW8xd3dzMTRrMmE0M3Rvd3VwZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/L3X9Gv2K19P194360A/giphy.gif" alt="Save Point" class="save-star-gif" id="saveStar">
+                <h1>HELPDESK PORTAL</h1>
+            </div>
+            <div id="syncStatus" style="color: var(--accent-green);">[CLOUD SYNC ACTIVE]</div>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('chatTab')">AI ASSISTANT</button>
+            <button class="tab-btn" onclick="switchTab('ticketsTab')">TICKETS QUEUE</button>
+            <button class="tab-btn" onclick="switchTab('createTab')">NEW TICKET</button>
+            <button class="tab-btn" onclick="switchTab('masterTab')">MASTER CONTROLS</button>
+        </div>
+
+        <!-- CHAT TAB -->
+        <div id="chatTab" class="tab-content active">
+            <div class="chat-box" id="chatBox">
+                <div class="chat-msg bot">Greetings. I am your Helpdesk Assistant. State your technical issue clearly.</div>
+            </div>
+            <div class="chat-input-group">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Type a message or request a ticket..." onkeypress="if(event.key==='Enter') handleChatSubmit()">
+                <button id="sendStopBtn" class="btn" onclick="handleChatSubmit()">SEND</button>
+            </div>
+        </div>
+
+        <!-- TICKETS LIST TAB -->
+        <div id="ticketsTab" class="tab-content">
+            <div id="ticketsList"></div>
+        </div>
+
+        <!-- MANUAL CREATE TICKET TAB -->
+        <div id="createTab" class="tab-content">
+            <div class="form-group">
+                <label>USER / SENDER</label>
+                <input type="text" id="manualUser" class="form-input" placeholder="Your Name">
+            </div>
+            <div class="form-group">
+                <label>PRIORITY RANK</label>
+                <select id="manualPriority" class="form-select">
+                    <option value="HIGH">HIGH (CAN'T WAIT)</option>
+                    <option value="MEDIUM" selected>MEDIUM (STANDARD)</option>
+                    <option value="LOW">LOW (CAN WAIT)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>ISSUE DESCRIPTION</label>
+                <textarea id="manualIssue" class="form-textarea" rows="4" placeholder="Describe the problem..."></textarea>
+            </div>
+            <button class="btn" onclick="submitManualTicket()">SUBMIT TICKET</button>
+        </div>
+
+        <!-- MASTER CONTROLS TAB -->
+        <div id="masterTab" class="tab-content">
+            <div class="master-panel">
+                <h3>CLOUD AUDIO & SYSTEM CONFIGURATION</h3>
+                <div class="form-group">
+                    <label>GLOBAL BGM MP3 LINK</label>
+                    <input type="text" id="masterAudioUrl" class="form-input" placeholder="https://example.com/audio.mp3">
+                </div>
+                <div class="form-group">
+                    <label>GLOBAL VOLUME LEVEL (<span id="volVal">50</span>%)</label>
+                    <input type="range" id="masterVolume" min="0" max="1" step="0.05" value="0.5" class="form-input" oninput="document.getElementById('volVal').innerText = Math.round(this.value * 100)">
+                </div>
+                <button class="btn" onclick="saveMasterAudioSettings()">SYNC AUDIO TO CLOUD</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="bgmAudio" loop src="https://archive.org/download/undertaleost_202004/Undertale%20-%20Lossless%20Soundtrack%20%28toby%20fox%29/toby%20fox%20-%20UNDERTALE%20Soundtrack%20-%2068%20Death%20by%20Glamour.mp3"></audio>
+
+    <script>
+        const JSONBIN_CONFIG = {
+            BIN_ID: '6ac684b6ffd5d1605356c326',
+            API_KEY: '$2a$10$hJLz5ET2NvIq3Fqy2oG6mefWXtKUFQr7XubSl0ak1XpUJfP50D8kW',
+            get URL() { return `https://api.jsonbin.io/v3/b/${this.BIN_ID}`; }
+        };
+
+        const OFF_TOPIC_REFUSALS = [
+            "* That is NOT in my job description, human.",
+            "* Mettaton only pays me to fix tech issues, dork.",
+            "* You are filled with DETERMINATION... to waste my time.",
+            "* Sans is sleeping, and so is my care for non-helpdesk questions.",
+            "* ERROR: Query contains 0% tech support. Try asking about a broken computer instead.",
+            "* Sorry, my helpdesk engine only runs on computer problems."
+        ];
+
+        let refusalIndex = 0;
+        let isGenerating = false;
+        let activeAbortController = null;
+        let state = {
+            tickets: [],
+            config: {
+                bgmUrl: "https://archive.org/download/undertaleost_202004/Undertale%20-%20Lossless%20Soundtrack%20%28toby%20fox%29/toby%20fox%20-%20UNDERTALE%20Soundtrack%20-%2068%20Death%20by%20Glamour.mp3",
+                volume: 0.5
+            }
+        };
+
+        const audioEl = document.getElementById('bgmAudio');
+
+        // TAB SWITCHING
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // CLOUD STORAGE SYNC
+        async function fetchCloudData() {
+            try {
+                const res = await fetch(JSONBIN_CONFIG.URL, {
+                    headers: { 'X-Master-Key': JSONBIN_CONFIG.API_KEY }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.record) {
+                        state.tickets = data.record.tickets || [];
+                        if (data.record.config) {
+                            state.config = data.record.config;
+                            applyAudioConfig();
+                        }
+                        renderTickets();
+                    }
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
+        }
+
+        async function syncToCloud() {
+            try {
+                await fetch(JSONBIN_CONFIG.URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_CONFIG.API_KEY
+                    },
+                    body: JSON.stringify(state)
+                });
+                renderTickets();
+            } catch (err) {
+                console.error("Sync error:", err);
+            }
+        }
+
+        function applyAudioConfig() {
+            if (state.config.bgmUrl && audioEl.src !== state.config.bgmUrl) {
+                audioEl.src = state.config.bgmUrl;
+            }
+            audioEl.volume = state.config.volume ?? 0.5;
+            document.getElementById('masterAudioUrl').value = state.config.bgmUrl || '';
+            document.getElementById('masterVolume').value = state.config.volume ?? 0.5;
+            document.getElementById('volVal').innerText = Math.round((state.config.volume ?? 0.5) * 100);
+            
+            // Auto play audio interaction trigger
+            audioEl.play().catch(() => {});
+        }
+
+        async function saveMasterAudioSettings() {
+            const url = document.getElementById('masterAudioUrl').value.trim();
+            const vol = parseFloat(document.getElementById('masterVolume').value);
+            state.config = { bgmUrl: url, volume: vol };
+            applyAudioConfig();
+            await syncToCloud();
+            alert("Global audio settings synchronized to cloud!");
+        }
+
+        // CHAT & AI GENERATION
+        function handleChatSubmit() {
+            if (isGenerating) {
+                if (activeAbortController) {
+                    activeAbortController.abort();
+                }
+                setGeneratingState(false);
+                appendChatMessage("bot", "* [GENERATION STOPPED BY USER]");
+                return;
+            }
+
+            const inputEl = document.getElementById('chatInput');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            appendChatMessage("user", query);
+            inputEl.value = "";
+
+            // Check Off-Topic Guardrail
+            if (isOffTopic(query)) {
+                const refusal = OFF_TOPIC_REFUSALS[refusalIndex % OFF_TOPIC_REFUSALS.length];
+                refusalIndex++;
+                setTimeout(() => appendChatMessage("bot", refusal), 300);
+                return;
+            }
+
+            // Ticket Draft Request Detection
+            if (query.toLowerCase().includes("ticket") || query.toLowerCase().includes("create ticket") || query.toLowerCase().includes("log issue")) {
+                generateTicketDraft(query);
+                return;
+            }
+
+            // Generate Technical Support Response
+            processAIResponse(query);
+        }
+
+        function isOffTopic(text) {
+            const techKeywords = ["error", "ticket", "help", "broken", "computer", "screen", "bug", "issue", "portal", "password", "network", "login", "slow", "crash", "code", "app"];
+            const lower = text.toLowerCase();
+            return !techKeywords.some(kw => lower.includes(kw)) && text.length > 5;
+        }
+
+        function processAIResponse(userText) {
+            setGeneratingState(true);
+            activeAbortController = new AbortController();
+
+            // Simulate fast, direct AI stream
+            let responseText = getDirectSolution(userText);
+            let charIdx = 0;
+            const msgDiv = appendChatMessage("bot", "");
+
+            const interval = setInterval(() => {
+                if (activeAbortController.signal.aborted) {
+                    clearInterval(interval);
+                    return;
+                }
+                msgDiv.textContent += responseText[charIdx];
+                charIdx++;
+                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+
+                if (charIdx >= responseText.length) {
+                    clearInterval(interval);
+                    setGeneratingState(false);
+                }
+            }, 20);
+        }
+
+        function getDirectSolution(text) {
+            const lower = text.toLowerCase();
+            if (lower.includes("password")) return "* Solution: Click 'Reset Password' on login, or contact system admin to issue a temp token. (Ask if you need step-by-step guidance).";
+            if (lower.includes("screen") || lower.includes("display")) return "* Solution: Inspect physical HDMI/DisplayPort cabling and toggle display mode using [Win + P].";
+            if (lower.includes("slow") || lower.includes("lag")) return "* Solution: Open Task Manager [Ctrl+Shift+Esc], check RAM/CPU utilization, and terminate high-resource background loops.";
+            return "* Solution: Clear browser cache, verify active network connections, and restart the service client.";
+        }
+
+        function generateTicketDraft(query) {
+            const draftHtml = `
+                <div>* Ticket draft generated based on your query:</div>
+                <div class="ticket-draft-box">
+                    <div><strong>USER:</strong> User_Session</div>
+                    <div><strong>PRIORITY:</strong> <span class="badge priority-high">HIGH (CAN'T WAIT)</span></div>
+                    <div><strong>ISSUE:</strong> ${query}</div>
+                    <button class="btn" style="margin-top: 8px;" onclick="confirmTicketDraft('${escapeQuotes(query)}', 'HIGH')">CONFIRM & SUBMIT TO CLOUD</button>
+                </div>
+            `;
+            appendChatMessage("bot", draftHtml, true);
+        }
+
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        async function confirmTicketDraft(issue, priority) {
+            const newTicket = {
+                id: Date.now(),
+                user: "User_Session",
+                priority: priority,
+                issue: issue,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            state.tickets.push(newTicket);
+            await syncToCloud();
+            appendChatMessage("bot", "* [SUCCESS] Ticket logged into cloud storage queue!");
+        }
+
+        async function submitManualTicket() {
+            const user = document.getElementById('manualUser').value.trim() || "Anonymous";
+            const priority = document.getElementById('manualPriority').value;
+            const issue = document.getElementById('manualIssue').value.trim();
+
+            if (!issue) {
+                alert("Please describe the issue.");
+                return;
+            }
+
+            const newTicket = {
+                id: Date.now(),
+                user: user,
+                priority: priority,
+                issue: issue,
+                timestamp: new Date().toLocaleTimeString()
+            };
+
+            state.tickets.push(newTicket);
+            await syncToCloud();
+
+            document.getElementById('manualIssue').value = "";
+            alert("Ticket successfully submitted!");
+            switchTab('ticketsTab');
+        }
+
+        function renderTickets() {
+            const container = document.getElementById('ticketsList');
+            if (!state.tickets.length) {
+                container.innerHTML = "<div style='color: #888;'>No active tickets in queue.</div>";
+                return;
+            }
+
+            container.innerHTML = state.tickets.map((t, idx) => `
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <span>#${t.id} - ${t.user} (${t.timestamp})</span>
+                        <span class="badge priority-${t.priority.toLowerCase()}">${t.priority}</span>
+                    </div>
+                    <div style="font-size: 1.2rem;">${t.issue}</div>
+                    <button class="btn btn-stop" style="margin-top: 8px; font-size: 0.9rem;" onclick="deleteTicket(${idx})">RESOLVE / DELETE</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteTicket(idx) {
+            state.tickets.splice(idx, 1);
+            await syncToCloud();
+        }
+
+        function setGeneratingState(generating) {
+            isGenerating = generating;
+            const btn = document.getElementById('sendStopBtn');
+            if (generating) {
+                btn.innerText = "STOP";
+                btn.classList.add('btn-stop');
+            } else {
+                btn.innerText = "SEND";
+                btn.classList.remove('btn-stop');
+                activeAbortController = null;
+            }
+        }
+
+        function appendChatMessage(role, text, isHtml = false) {
+            const chatBox = document.getElementById('chatBox');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg ${role}`;
+            if (isHtml) {
+                msgDiv.innerHTML = text;
+            } else {
+                msgDiv.textContent = text;
+            }
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return msgDiv;
+        }
+
+        // SNOW ANIMATION EFFECT
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+        let flakes = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 50; i++) {
+            flakes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 3 + 2,
+                speed: Math.random() * 1 + 0.5
+            });
+        }
+
+        function drawSnow() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#ffffff";
+            flakes.forEach(f => {
+                ctx.fillRect(f.x, f.y, f.size, f.size);
+                f.y += f.speed;
+                if (f.y > canvas.height) f.y = 0;
+            });
+            requestAnimationFrame(drawSnow);
+        }
+        drawSnow();
+
+        // INIT LOAD
+        document.addEventListener('click', () => audioEl.play().catch(() => {}), { once: true });
+        fetchCloudData();
+    </script>
+</body>
+</html>
