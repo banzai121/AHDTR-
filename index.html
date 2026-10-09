@@ -1339,7 +1339,6 @@ window.confirmChatTicket = function(title, transcript) {
     }
 );
                 isModelLoaded = true;
-                
                 updateAIStatus("✓ Qwen 2.5 High-Speed Engine Active", "var(--accent-green)");
                 showProgressBar(false);
            } catch (err) {
@@ -1347,6 +1346,7 @@ window.confirmChatTicket = function(title, transcript) {
     updateAIStatus("❌ AI Engine Error: " + errorMsg, "#ff5555");
     showProgressBar(false);
 }
+        }
 
 
         // HIGH-SPEED CHAT HANDLER WITH GREETING & TICKET DISPATCH
