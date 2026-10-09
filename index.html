@@ -1185,8 +1185,8 @@ window.confirmChatTicket = function(title, transcript) {
                 const wllama = await initWllama();
                 updateAIStatus(`Connecting to AI Engine...`, "#ffff55");
 
-                // SPEED OPTIMIZATION 1: Multi-Core CPU Threading (up to 4 cores)
-                const threads = Math.min(4, navigator.hardwareConcurrency || 4);
+                // SPEED OPTIMIZATION 1
+                const threads = 1;
 
                 await wllama.loadModelFromHF(
                     DEFAULT_MODEL_CONFIG.repo,
