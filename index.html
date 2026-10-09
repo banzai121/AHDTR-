@@ -1156,9 +1156,6 @@ window.confirmChatTicket = function(title, transcript) {
         window.createTicket(null, autoTicket);
     }
 };
-            if (typeof window.createTicket === 'function') {
-                window.createTicket(null, autoTicket);
-            }
 
             const alertBox = document.createElement('div');
             alertBox.className = 'chat-msg bot';
