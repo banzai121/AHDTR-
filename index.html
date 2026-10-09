@@ -1086,9 +1086,10 @@
             return !techKeywords.some(kw => t.includes(kw));
         }
 
-        function isExplicitTicketRequest(text) {
-            const t = text.toLowerCase();
-            return t.includes("submit ticket") || t.includes("create ticket") || t.includes("human") || t.includes("talk to support") || t.includes("escalate");
+             function isExplicitTicketRequest(text) {
+                    const isQuestion = /\b(how|where|can i|what is|way to|should i)\b/i.test(text);
+                    const isTicketIntent = /\b(submit|create|open|log)\b.*\bticket\b/i.test(text) || text.toLowerCase().includes("escalate");
+                        return isTicketIntent && !isQuestion;
         }
 
         // START 15-MINUTE CHAT SESSION TIMER
@@ -1105,7 +1106,7 @@
                 if (remainingSeconds <= 0) {
                     clearInterval(timerInterval);
                     if (displayEl) displayEl.innerText = "⏱️ AI Window: EXPIRED (Auto-Routing)";
-                    if (!autoEscalated) triggerAutoTicketEscalation("15-Minute SLA Time Exceeded");
+                    if (!autoEscalated) triggerDraftPreview("15-Minute SLA Time Exceeded");
                 } else {
                     const mins = Math.floor(remainingSeconds / 60);
                     const secs = remainingSeconds % 60;
@@ -1116,24 +1117,42 @@
         }
 
         // TRIGGER AUTOMATIC TICKET ESCALATION
-        function triggerAutoTicketEscalation(reason = "User Requested Escalation") {
-            autoEscalated = true;
-            const chatWindow = document.getElementById('chatWindow');
+       function triggerDraftPreview(reason = "User Requested Escalation") {
+    autoEscalated = true;
+    const chatWindow = document.getElementById('chatWindow');
 
-            const summaryDesc = chatTranscript.length > 0 
-                ? chatTranscript.join(" | ") 
-                : "User initiated chat session that required escalation to human IT support staff.";
+    const firstUserQuery = chatTranscript.find(t => t.startsWith("User: ")) || "User Chat Escalation";
+    const cleanTitle = firstUserQuery.replace("User: ", "").substring(0, 45);
+    const summaryDesc = chatTranscript.length > 0 ? chatTranscript.join(" | ") : "Escalated chat session.";
 
-            const firstUserQuery = chatTranscript.find(t => t.startsWith("User: ")) || "Auto-Escalated Chat Support Request";
+    const draftMsg = document.createElement('div');
+    draftMsg.className = 'chat-msg bot';
+    draftMsg.innerHTML = `
+        <div>* [AI DRAFT]: Review details before submitting to human IT staff:</div>
+        <div style="border: 2px dashed var(--accent-yellow); padding: 8px; margin-top: 6px; background: #111;">
+            <div><strong>TITLE:</strong> ${cleanTitle}</div>
+            <div><strong>REASON:</strong> ${reason}</div>
+            <button class="btn" style="margin-top: 8px;" onclick="confirmChatTicket('${cleanTitle.replace(/'/g, "\\'")}', '${summaryDesc.replace(/'/g, "\\'")}')">CONFIRM & SUBMIT TICKET</button>
+        </div>
+    `;
 
-            const autoTicket = {
-                title: `[Escalated] ${firstUserQuery.replace("User: ", "").substring(0, 45)}...`,
-                email: "chat.user@helpdesk.local",
-                category: "Hardware",
-                desc: `[Reason: ${reason}]\n\nTranscript History:\n${summaryDesc}`,
-                tried: "Attempted 15-minute AI Specialist Chat self-service"
-            };
+    chatWindow.appendChild(draftMsg);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
 
+window.confirmChatTicket = function(title, transcript) {
+    const autoTicket = {
+        title: `[Escalated] ${title}`,
+        email: prompt("Please enter your email address for ticket updates:", "user@domain.com") || "chat.user@helpdesk.local",
+        category: "Hardware",
+        desc: `Transcript History:\n${transcript}`,
+        tried: "Attempted 15-minute AI Specialist Chat self-service"
+    };
+
+    if (typeof window.createTicket === 'function') {
+        window.createTicket(null, autoTicket);
+    }
+};
             if (typeof window.createTicket === 'function') {
                 window.createTicket(null, autoTicket);
             }
@@ -1224,8 +1243,8 @@
 
             // CHECK EXPLICIT TICKET CREATION REQUEST
             if (isExplicitTicketRequest(query)) {
-                triggerAutoTicketEscalation("Direct User Request in Chat");
-                return;
+                triggerDraftPreview("Direct User Request in Chat"); 
+                return; 
             }
 
             // CHECK OFF-TOPIC INTENT -> TRIGGER UNDERTALE REFUSAL
