@@ -1344,7 +1344,7 @@ window.confirmChatTicket = function(title, transcript) {
                 updateAIStatus("✓ Qwen 2.5 High-Speed Engine Active", "var(--accent-green)");
                 showProgressBar(false);
             } catch (err) {
-                updateAIStatus('❌ AI Engine Error: ${err.message || err}'), "#ff5555");
+                updateAIStatus(`❌ AI Engine Error: ${err.message || err}`, "#ff5555");
                 showProgressBar(false);
             }
         }
