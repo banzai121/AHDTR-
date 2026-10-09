@@ -1327,8 +1327,8 @@ window.confirmChatTicket = function(title, transcript) {
 
                 await wllama.loadModelFromHF(
                     {
-                repo: DEFAULT_MODEL_CONFIG.repo,
-                    file: DEFAULT_MODEL_CONFIG.file,
+                     DEFAULT_MODEL_CONFIG.repo,
+                     DEFAULT_MODEL_CONFIG.file,
 },
                     {
                         n_ctx: 1024,        // SPEED OPTIMIZATION 2: Reduced context memory
