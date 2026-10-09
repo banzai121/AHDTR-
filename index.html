@@ -1297,20 +1297,22 @@ window.confirmChatTicket = function(title, transcript) {
 
 
 
-        async function initWllama() {
+       async function initWllama() {
     if (!wllamaInstance) {
         updateAIStatus("Initializing WebAssembly worker...", "#ffff55");
         
         const CONFIG_PATHS = {
+            'single-thread/wllama.js': 'https://cdn.jsdelivr.net/npm/@wllama/wllama@1.4.1/esm/single-thread/wllama.js',
             'single-thread/wllama.wasm': 'https://cdn.jsdelivr.net/npm/@wllama/wllama@1.4.1/esm/single-thread/wllama.wasm',
+            'multi-thread/wllama.js': 'https://cdn.jsdelivr.net/npm/@wllama/wllama@1.4.1/esm/multi-thread/wllama.js',
             'multi-thread/wllama.wasm': 'https://cdn.jsdelivr.net/npm/@wllama/wllama@1.4.1/esm/multi-thread/wllama.wasm',
+            'multi-thread/wllama.worker.mjs': 'https://cdn.jsdelivr.net/npm/@wllama/wllama@1.4.1/esm/multi-thread/wllama.worker.mjs',
         };
 
         wllamaInstance = new Wllama(CONFIG_PATHS);
     }
     return wllamaInstance;
 }
-
 
         const DEFAULT_MODEL_CONFIG = {
             type: 'hf',
